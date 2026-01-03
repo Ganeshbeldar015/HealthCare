@@ -4,12 +4,14 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/style.css';
 import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from "./context/AuthContext";
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      {/* You can wrap App in an ErrorBoundary or HelmetProvider here if needed */}
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

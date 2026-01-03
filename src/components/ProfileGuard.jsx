@@ -48,7 +48,7 @@ function ProfileGuard({ children }) {
 
   /* ❌ Logged in but profile NOT completed */
   if (!profileCompleted) {
-    return <Navigate to="/patient-registration" replace />;
+    return <Navigate to="/patientR" replace />;
   }
 
   /* ✅ Everything OK */

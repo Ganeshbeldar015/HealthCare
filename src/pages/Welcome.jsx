@@ -14,7 +14,7 @@ function Welcome() {
         <div className="absolute bottom-[-10%] left-[20%] w-[400px] h-[400px] bg-indigo-300 rounded-full blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
       </div>
 
-      {/* 🌟 HERO SECTION */}
+      {/* 🌟 HERO */}
       <section className="relative z-10 max-w-7xl mx-auto px-6 pt-28 pb-20 text-center">
         <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
           Smart Healthcare <br />
@@ -24,21 +24,29 @@ function Welcome() {
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-10">
-          A unified digital ecosystem that empowers patients to manage
-          registrations, appointments, prescriptions, and medical expenses —
-          all from one intelligent dashboard.
+          A unified digital ecosystem connecting patients, doctors, and
+          administrators — managing healthcare smarter, faster, and safer.
         </p>
 
+        {/* 🔑 ACTION BUTTONS */}
         <div className="flex justify-center gap-4 flex-wrap">
           <button
             onClick={() => navigate("/signup")}
             className="px-10 py-4 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-all duration-300 shadow-xl hover:scale-105"
           >
-            Get Started
+            Register as Patient
           </button>
+
+          <button
+            onClick={() => navigate("/doctor-signup")}
+            className="px-10 py-4 rounded-xl bg-white border border-purple-300 text-purple-700 font-semibold hover:bg-purple-50 transition-all duration-300"
+          >
+            Register as Doctor
+          </button>
+
           <button
             onClick={() => navigate("/login")}
-            className="px-10 py-4 rounded-xl border border-purple-300 text-purple-700 font-semibold hover:bg-purple-50 transition-all duration-300"
+            className="px-10 py-4 rounded-xl text-gray-700 font-semibold hover:underline transition-all duration-300"
           >
             Login
           </button>
@@ -98,18 +106,26 @@ function Welcome() {
       {/* 🚀 FINAL CTA */}
       <section className="relative z-10 bg-white py-20 text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-          Experience Smarter Healthcare Today
+          Built for Patients, Doctors & Admins
         </h2>
         <p className="text-gray-600 mb-10 max-w-2xl mx-auto">
-          Join thousands of users moving towards a simpler, smarter,
-          and more transparent healthcare experience.
+          Patients manage care, doctors handle appointments, and admins
+          maintain quality — all from one secure platform.
         </p>
-        <button
-          onClick={() => navigate("/signup")}
-          className="px-12 py-5 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-all duration-300 shadow-xl hover:scale-105"
-        >
-          Register as Patient
-        </button>
+        <div className="flex justify-center gap-4 flex-wrap">
+          <button
+            onClick={() => navigate("/signup")}
+            className="px-12 py-5 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-all duration-300 shadow-xl hover:scale-105"
+          >
+            Join as Patient
+          </button>
+          <button
+            onClick={() => navigate("/doctor-signup")}
+            className="px-12 py-5 rounded-xl bg-white border border-purple-300 text-purple-700 font-semibold hover:bg-purple-50 transition-all duration-300"
+          >
+            Join as Doctor
+          </button>
+        </div>
       </section>
     </div>
   );
@@ -119,41 +135,17 @@ export default Welcome;
 
 /* 🧠 Data */
 const features = [
-  {
-    icon: "🧾",
-    title: "Patient Registration",
-    desc: "Secure digital onboarding with complete personal and medical details.",
-  },
-  {
-    icon: "📊",
-    title: "Smart Dashboard",
-    desc: "Real-time insights into appointments, health records, and activity.",
-  },
-  {
-    icon: "📅",
-    title: "Appointment Booking",
-    desc: "Book and manage doctor appointments with ease.",
-  },
-  {
-    icon: "💊",
-    title: "Digital Prescriptions",
-    desc: "Access prescriptions and medical history anytime, anywhere.",
-  },
-  {
-    icon: "💳",
-    title: "Medical Billing",
-    desc: "Track expenses, payments, and insurance records transparently.",
-  },
-  {
-    icon: "🔐",
-    title: "Secure & Private",
-    desc: "Enterprise-grade security powered by Firebase.",
-  },
+  { icon: "🧾", title: "Patient Registration", desc: "Secure digital onboarding with medical history." },
+  { icon: "📊", title: "Smart Dashboards", desc: "Role-based dashboards for patients, doctors & admins." },
+  { icon: "📅", title: "Appointment Requests", desc: "Request, approve, and manage appointments seamlessly." },
+  { icon: "💊", title: "Digital Prescriptions", desc: "Access prescriptions and treatment history anytime." },
+  { icon: "💳", title: "Billing & Records", desc: "Track medical expenses and financial history." },
+  { icon: "🔐", title: "Enterprise Security", desc: "Role-based access with Firebase security." },
 ];
 
 const steps = [
-  "Create an account",
-  "Complete patient registration",
-  "Book appointments",
-  "Manage records & billing",
+  "Register as patient or doctor",
+  "Complete profile details",
+  "Request or manage appointments",
+  "Track health records & billing",
 ];

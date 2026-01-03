@@ -1,86 +1,132 @@
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 
+/* Public */
 import Welcome from "./pages/Welcome";
-import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import UpdatePassword from "./pages/UpdatePassword";
+
+/* Patient */
 import PatientR from "./pages/PatientR";
+import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import Appointments from "./pages/Appointments";
+
+/* Doctor */
+import DoctorSignup from "./pages/DoctorSignup";
+import DoctorForm from "./pages/DoctorForm";
+import DoctorWaiting from "./pages/DoctorWaiting";
+import DoctorDashboard from "./pages/DoctorDashboard";
+
+/* Admin */
+import AdminDashboard from "./pages/AdminDashboard";
+
+/* Layouts & Guards */
 import TopPanel from "./components/TopPanel";
+import DashboardLayout from "./layouts/DashboardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfileGuard from "./components/ProfileGuard";
-import DashboardLayout from "./layouts/DashboardLayout";
+import AdminRoute from "./components/AdminRoute";
 
 function App() {
   const location = useLocation();
 
-  // 🚫 Routes where TopPanel should NOT appear
+  // 🚫 Pages without TopPanel
   const hideTopPanelRoutes = [
     "/",
     "/login",
     "/signup",
+    "/doctor-signup",
     "/update-password",
   ];
 
   const hideTopPanel = hideTopPanelRoutes.includes(location.pathname);
 
   return (
-    <div className="relative min-h-screen bg-cover bg-center">
+    <div className="min-h-screen bg-gray-50">
       {!hideTopPanel && <TopPanel />}
 
-      <main className={hideTopPanel ? "p-0" : "p-4 min-h-[calc(100vh-64px)]"}>
-        <div className={hideTopPanel ? "w-full" : "w-full max-w-7xl mx-auto"}>
-          <Routes>
-            {/* 🌐 Public Routes */}
-            <Route path="/" element={<Welcome />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/update-password" element={<UpdatePassword />} />
+      <main className={hideTopPanel ? "" : "pt-4"}>
+        <Routes>
 
-            {/* 🔐 Auth-only (profile not required yet) */}
-            <Route
-              path="/patientR"
-              element={
-                <ProtectedRoute>
-                  <PatientR />
-                </ProtectedRoute>
-              }
-            />
+          {/* 🌐 PUBLIC ROUTES */}
+          <Route path="/" element={<Welcome />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/doctor-signup" element={<DoctorSignup />} />
+          <Route path="/update-password" element={<UpdatePassword />} />
 
-            {/* 🧾 Auth + Profile Required */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProfileGuard>
-                  <Dashboard />
-                </ProfileGuard>
-              }
-            />
+          {/* 🧍 PATIENT REGISTRATION */}
+          <Route
+            path="/patientR"
+            element={
+              <ProtectedRoute role="patient">
+                <PatientR />
+              </ProtectedRoute>
+            }
+          />
 
-            {/* ❓ Fallback */}
-            <Route path="*" element={<Welcome />} />
-            <Route
-              element={
+          {/* 🧾 PATIENT DASHBOARD + SIDEBAR */}
+          <Route
+            element={
+              <ProtectedRoute role="patient">
                 <ProfileGuard>
                   <DashboardLayout />
                 </ProfileGuard>
-              }
-            >
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              {/* <Route path="/profile" element={<div>Profile Page</div>} /> */}
-              <Route path="/appointments" element={<div>Appointments</div>} />
-              <Route path="/records" element={<div>Records</div>} />
-              <Route path="/prescription" element={<div>Prescription</div>} />
-              <Route path="/billing" element={<div>Billing</div>} />
-              <Route path="/notifications" element={<div>Notifications</div>} />
-            </Route>
-          </Routes>
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/appointments" element={<Appointments />} />
+            <Route path="/records" element={<div>Records</div>} />
+            <Route path="/prescription" element={<div>Prescription</div>} />
+            <Route path="/billing" element={<div>Billing</div>} />
+            <Route path="/notifications" element={<div>Notifications</div>} />
+          </Route>
 
+          {/* 👨‍⚕️ DOCTOR FLOW */}
+          <Route
+            path="/doctor-form"
+            element={
+              <ProtectedRoute role="doctor">
+                <DoctorForm />
+              </ProtectedRoute>
+            }
+          />
 
-        </div>
+          <Route
+            path="/doctor-waiting"
+            element={
+              <ProtectedRoute role="doctor">
+                <DoctorWaiting />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/doctor-dashboard"
+            element={
+              <ProtectedRoute role="doctor">
+                <DoctorDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 🛡️ ADMIN (ONLY ONE ROUTE, CORRECT) */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+
+          {/* ❓ FALLBACK */}
+          <Route path="*" element={<Welcome />} />
+        </Routes>
       </main>
     </div>
   );

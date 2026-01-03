@@ -5,7 +5,7 @@ function Dashboard() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 pt-12">
+    <div className="min-h-screen bg-gray-50 pt-12">
       {/* Welcome Header */}
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">

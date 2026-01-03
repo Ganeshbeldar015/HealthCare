@@ -94,12 +94,18 @@ function Profile() {
                     <div className="bg-white rounded-xl shadow p-6">
                         <h3 className="font-semibold text-gray-800 mb-4">Quick Links</h3>
                         <div className="flex flex-wrap gap-2">
-                            <QuickLink text="Appointments" />
+                            <span
+                                onClick={() => navigate("/appointments")}
+                                className="px-3 py-1 text-xs rounded bg-purple-100 text-purple-700 cursor-pointer hover:bg-purple-200 transition"
+                            >
+                                Appointments
+                            </span>
+                            
                             <QuickLink text="Medical Records" />
                             <QuickLink text="Medical Bills" />
                             <QuickLink text="Dashboard" />
                             <span
-                                onClick={() => navigate("/patient-registration")}
+                                onClick={() => navigate("/patientR")}
                                 className="px-3 py-1 text-xs rounded bg-purple-100 text-purple-700 cursor-pointer hover:bg-purple-200 transition"
                             >
                                 Edit Information

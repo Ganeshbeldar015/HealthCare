@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../utils/firebase';
+import { auth , db} from '../utils/firebase';
 import { useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { doc, getDoc } from "firebase/firestore";
+
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -20,25 +22,25 @@ function Login() {
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleLogin = async () => {
-    setErrorEmail('');
-    setErrorPassword('');
-    setLoginError('');
+    setErrorEmail("");
+    setErrorPassword("");
+    setLoginError("");
     setIsLoading(true);
 
     if (!email) {
-      setErrorEmail('Email is required.');
+      setErrorEmail("Email is required.");
       setIsLoading(false);
       return;
     }
 
     if (!isValidEmail(email)) {
-      setErrorEmail('Please enter a valid email address.');
+      setErrorEmail("Please enter a valid email address.");
       setIsLoading(false);
       return;
     }
 
     if (!password) {
-      setErrorPassword('Password is required.');
+      setErrorPassword("Password is required.");
       setIsLoading(false);
       return;
     }
@@ -50,30 +52,75 @@ function Login() {
         password
       );
 
-      if (!userCredential.user.emailVerified) {
-        setLoginError(
-          'Please verify your email before logging in.'
-        );
+      const user = userCredential.user;
+
+      if (!user.emailVerified) {
+        setLoginError("Please verify your email before logging in.");
         setIsLoading(false);
         return;
       }
 
-      navigate('/patientR');
+      // 🔥 Fetch user role
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        setLoginError("User profile not found. Contact support.");
+        setIsLoading(false);
+        return;
+      }
+
+      const userData = userSnap.data();
+
+      // 🔁 ROLE-BASED REDIRECTION
+      if (userData.role === "patient") {
+        if (!userData.profileCompleted) {
+          navigate("/patientR");
+        } else {
+          navigate("/dashboard");
+        }
+      }
+
+      else if (userData.role === "doctor") {
+        const doctorRef = doc(db, "doctors", user.uid);
+        const doctorSnap = await getDoc(doctorRef);
+
+        if (!doctorSnap.exists()) {
+          navigate("/doctor-form");
+          return;
+        }
+
+        const doctorStatus = doctorSnap.data().status;
+
+        if (doctorStatus === "approved") {
+          navigate("/doctor-dashboard");
+        } else {
+          navigate("/doctor-waiting");
+        }
+      }
+
+      else if (userData.role === "admin") {
+        navigate("/admin");
+      }
+
+      else {
+        setLoginError("Invalid user role.");
+      }
+
     } catch (error) {
       if (
-        error.code === 'auth/user-not-found' ||
-        error.code === 'auth/wrong-password'
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password"
       ) {
-        setLoginError(
-          'Invalid email or password. Please try again.'
-        );
+        setLoginError("Invalid email or password. Please try again.");
       } else {
-        setLoginError(error.message || 'Login failed.');
+        setLoginError(error.message || "Login failed.");
       }
     } finally {
       setIsLoading(false);
     }
   };
+
 
   // Auto-clear reset status
   useEffect(() => {
@@ -194,10 +241,10 @@ function Login() {
                 Don’t have an account?{' '}
                 <button
                   type="button"
-                  onClick={() => navigate('/signup')}
+                  onClick={() => navigate('/')}
                   className="text-purple-600 underline"
                 >
-                  Sign up here
+                  Register yourself first.
                 </button>
               </p>
             </div>
@@ -209,3 +256,5 @@ function Login() {
 }
 
 export default Login;
+
+

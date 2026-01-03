@@ -37,7 +37,7 @@ function TopPanel() {
 
   return (
     <div className="bg-white/80 backdrop-blur-md fixed top-0 inset-x-0 z-50 border-b border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between">
 
           {/* Left: Logo */}
@@ -62,7 +62,7 @@ function TopPanel() {
                     aria-label="User profile menu"
                   >
                     <img
-                      src="/public/images/user_profile.png"
+                      src="/images/user_profile.png"
                       alt="Profile"
                       className="w-9 h-9 rounded-full border-2 border-purple-300 shadow-sm hover:scale-105 transition-transform"
                     />
