@@ -1,63 +1,50 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../utils/supabase';
+import {
+  verifyPasswordResetCode,
+  confirmPasswordReset,
+} from 'firebase/auth';
+import { auth } from '../utils/firebase';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
 const UpdatePassword = () => {
   const navigate = useNavigate();
+
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(true); // verifying token
+  const [loading, setLoading] = useState(true);     // verifying link
   const [processing, setProcessing] = useState(false); // updating password
-  const [sessionSet, setSessionSet] = useState(false);
+  const [codeValid, setCodeValid] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [oobCode, setOobCode] = useState('');
 
   useEffect(() => {
     const init = async () => {
       try {
-        // Read tokens from URL hash (fragment)
-        const hash = window.location.hash || '';
-        const params = new URLSearchParams(hash.replace('#', ''));
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('oobCode');
 
-        // Debug: Log the URL and tokens (remove in production)
-        console.log('Current URL:', window.location.href);
-        console.log('Hash:', hash);
-        console.log('Access token present:', !!accessToken);
-        console.log('Refresh token present:', !!refreshToken);
-
-        if (!accessToken || !refreshToken) {
-          setMessage('Invalid or missing token in URL. Please use the link from your email or request a new one.');
+        if (!code) {
+          setMessage(
+            'Invalid or missing reset link. Please request a new password reset.'
+          );
           setLoading(false);
-          setSessionSet(false);
           return;
         }
 
-        // Set session before letting user proceed
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
+        setOobCode(code);
 
-        if (error) {
-          setMessage('Session could not be verified. The reset link may be expired or invalid. Please request a new one.');
-          setSessionSet(false);
-        } else {
-          setSessionSet(true);
-          setMessage('Session verified. You may now set your new password.');
-        }
+        // Verify reset code
+        await verifyPasswordResetCode(auth, code);
 
-        // Remove tokens from address bar for security
-        try {
-          window.history.replaceState(null, '', window.location.pathname + window.location.search);
-        } catch (e) {
-          // ignore if not supported
-        }
-      } catch (err) {
-        setMessage('An unexpected error occurred. Please try again.');
-        setSessionSet(false);
+        setCodeValid(true);
+        setMessage('Reset link verified. You may now set a new password.');
+      } catch (error) {
+        setMessage(
+          'This reset link is invalid or expired. Please request a new one.'
+        );
+        setCodeValid(false);
       } finally {
         setLoading(false);
       }
@@ -68,34 +55,36 @@ const UpdatePassword = () => {
 
   const handleUpdate = async () => {
     setMessage('');
+
     if (!newPassword || !confirmPassword) {
-      setMessage('Please fill in both password fields.');
-      return;
+      return setMessage('Please fill in both password fields.');
     }
-    if (newPassword !== confirmPassword) {
-      setMessage('❌ Passwords do not match.');
-      return;
-    }
+
     if (newPassword.length < 6) {
-      setMessage('Password should be at least 6 characters.');
-      return;
+      return setMessage('Password must be at least 6 characters.');
     }
-    if (!sessionSet) {
-      setMessage('No valid session. Please use the reset link from your email.');
-      return;
+
+    if (newPassword !== confirmPassword) {
+      return setMessage('❌ Passwords do not match.');
+    }
+
+    if (!codeValid) {
+      return setMessage(
+        'Reset session is invalid. Please request a new reset link.'
+      );
     }
 
     setProcessing(true);
+
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) {
-        setMessage('❌ Failed to update password: ' + (error.message || 'Unknown error'));
-      } else {
-        setMessage('✅ Password updated successfully. Redirecting to login...');
-        setTimeout(() => navigate('/login'), 1800);
-      }
-    } catch (err) {
-      setMessage('❌ Unexpected error occurred. Try again.');
+      await confirmPasswordReset(auth, oobCode, newPassword);
+
+      setMessage('✅ Password updated successfully. Redirecting to login...');
+      setTimeout(() => navigate('/login'), 1800);
+    } catch (error) {
+      setMessage(
+        '❌ Failed to update password. The link may be expired.'
+      );
     } finally {
       setProcessing(false);
     }
@@ -109,14 +98,16 @@ const UpdatePassword = () => {
         </h2>
 
         {loading ? (
-          <p className="text-center text-gray-500">Verifying reset link...</p>
+          <p className="text-center text-gray-500">
+            Verifying reset link...
+          </p>
         ) : (
           <>
-            {!sessionSet && (
+            {!codeValid && (
               <p className="mb-4 text-center text-red-600">{message}</p>
             )}
 
-            {sessionSet && (
+            {codeValid && (
               <>
                 <div className="relative mb-4">
                   <input
@@ -129,9 +120,8 @@ const UpdatePassword = () => {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(s => !s)}
+                    onClick={() => setShowPassword((s) => !s)}
                     className="absolute top-3 right-3 text-gray-600"
-                    aria-label="Toggle password visibility"
                   >
                     {showPassword ? (
                       <EyeSlashIcon className="w-5 h-5" />
