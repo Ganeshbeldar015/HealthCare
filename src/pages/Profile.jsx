@@ -19,7 +19,7 @@ function Profile() {
         const snap = await getDoc(ref);
         if (snap.exists()) setPatient(snap.data());
       } catch (err) {
-        console.error("Failed to load profile:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -30,8 +30,8 @@ function Profile() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Loading patient profile...
+      <div className="flex justify-center items-center h-64 text-gray-500">
+        Loading profile...
       </div>
     );
   }
@@ -39,7 +39,7 @@ function Profile() {
   if (!patient) {
     return (
       <div className="text-center text-gray-500 p-6">
-        No patient profile found
+        No profile data found
       </div>
     );
   }
@@ -47,98 +47,83 @@ function Profile() {
   const { personalInfo, medicalInfo } = patient;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-      
-      {/* ================= Profile Header ================= */}
-      <div className="bg-white rounded-2xl shadow-sm border p-6 flex flex-col lg:flex-row gap-6">
-        {/* Avatar */}
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold">
-            {personalInfo.firstName?.[0]}
-            {personalInfo.lastName?.[0]}
-          </div>
+    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
 
-          <div>
-            <h2 className="text-xl font-semibold text-gray-800">
-              {personalInfo.firstName} {personalInfo.lastName}
-            </h2>
-            <p className="text-sm text-gray-500">{user.email}</p>
-            <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
-              Active Patient
-            </span>
-          </div>
+      {/* ================= Profile Header ================= */}
+      <div className="bg-white border rounded-2xl p-6 flex items-center gap-6">
+        <div className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold">
+          {personalInfo.firstName?.[0]}
+          {personalInfo.lastName?.[0]}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-1">
-          <Stat label="Appointments" value="0" />
-          <Stat label="Pending" value="0" />
-          <Stat label="Reports" value="0" />
-          <Stat label="Bills" value="0" />
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-800">
+            {personalInfo.firstName} {personalInfo.lastName}
+          </h2>
+          <p className="text-sm text-gray-500">{user.email}</p>
+          <span className="inline-block mt-2 px-3 py-1 text-xs rounded-full bg-green-100 text-green-700">
+            Registered Patient
+          </span>
         </div>
       </div>
 
-      {/* ================= Patient Details ================= */}
-      <div className="bg-white rounded-2xl shadow-sm border p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          Personal & Medical Information
-        </h3>
+      {/* ================= Profile Details ================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Info label="Gender" value={personalInfo.gender} />
-          <Info label="Date of Birth" value={personalInfo.dob} />
-          <Info label="Phone" value={personalInfo.contact} />
-          <Info label="Blood Group" value={medicalInfo.bloodGroup} />
-          <Info label="Address" value={personalInfo.address} />
-          <Info label="Allergies" value={medicalInfo.allergies || "None"} />
-          <Info label="Conditions" value={medicalInfo.conditions || "None"} />
-          <Info label="Medical History" value={medicalInfo.history || "None"} />
+        {/* -------- Personal Information -------- */}
+        <div className="bg-white border rounded-2xl p-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Personal Information
+          </h3>
+
+          <div className="space-y-4">
+            <ProfileItem label="Full Name" value={`${personalInfo.firstName} ${personalInfo.lastName}`} />
+            <ProfileItem label="Gender" value={personalInfo.gender} />
+            <ProfileItem label="Date of Birth" value={personalInfo.dob} />
+            <ProfileItem label="Phone Number" value={personalInfo.contact} />
+            <ProfileItem label="Address" value={personalInfo.address} />
+          </div>
+        </div>
+
+        {/* -------- Medical Information -------- */}
+        <div className="bg-white border rounded-2xl p-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Medical Information
+          </h3>
+
+          <div className="space-y-4">
+            <ProfileItem label="Blood Group" value={medicalInfo.bloodGroup} />
+            <ProfileItem label="Allergies" value={medicalInfo.allergies || "None"} />
+            <ProfileItem label="Medical Conditions" value={medicalInfo.conditions || "None"} />
+            <ProfileItem label="Medical History" value={medicalInfo.history || "None"} />
+          </div>
         </div>
       </div>
 
       {/* ================= Bottom Section ================= */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Medical Records */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold text-gray-800">
-              Medical Records
-            </h3>
-            <span className="text-xs text-gray-400">0 Records</span>
-          </div>
+        <div className="lg:col-span-2 bg-white border rounded-2xl p-6">
+          <h3 className="font-semibold text-gray-800 mb-4">
+            Medical Records
+          </h3>
 
           <div className="text-center text-gray-400 py-12">
-            No medical records uploaded yet
+            No medical records available
           </div>
         </div>
 
-        {/* Right Sidebar */}
-        <div className="space-y-6">
-          
-          {/* Quick Actions */}
-          <div className="bg-white rounded-2xl shadow-sm border p-6">
-            <h3 className="font-semibold text-gray-800 mb-4">
-              Quick Actions
-            </h3>
+        {/* Quick Actions */}
+        <div className="bg-white border rounded-2xl p-6">
+          <h3 className="font-semibold text-gray-800 mb-4">
+            Quick Actions
+          </h3>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Action onClick={() => navigate("/appointments")} text="Appointments" />
-              <Action text="Medical Records" />
-              <Action text="Medical Bills" />
-              <Action onClick={() => navigate("/dashboard")} text="Dashboard" />
-              <Action onClick={() => navigate("/patientR")} text="Edit Profile" />
-            </div>
-          </div>
-
-          {/* Reviews */}
-          <div className="bg-white rounded-2xl shadow-sm border p-6">
-            <h3 className="font-semibold text-gray-800 mb-2">
-              Patient Reviews
-            </h3>
-            <p className="text-sm text-gray-400">
-              No reviews available
-            </p>
+          <div className="space-y-3">
+            <Action text="View Appointments" onClick={() => navigate("/appointments")} />
+            <Action text="Edit Profile" onClick={() => navigate("/patientR")} />
+            <Action text="Go to Dashboard" onClick={() => navigate("/dashboard")} />
           </div>
         </div>
       </div>
@@ -148,22 +133,13 @@ function Profile() {
 
 /* ================= Reusable Components ================= */
 
-function Info({ label, value }) {
+function ProfileItem({ label, value }) {
   return (
-    <div className="bg-gray-50 rounded-xl p-4 border">
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
-      <p className="text-sm font-medium text-gray-800 truncate">
+    <div className="flex justify-between border-b pb-2 last:border-b-0">
+      <p className="text-sm text-gray-500">{label}</p>
+      <p className="text-sm font-medium text-gray-800 text-right max-w-[60%]">
         {value || "—"}
       </p>
-    </div>
-  );
-}
-
-function Stat({ label, value }) {
-  return (
-    <div className="bg-blue-50 rounded-xl p-4 text-center border">
-      <p className="text-xs text-blue-600">{label}</p>
-      <p className="text-lg font-semibold text-blue-800">{value}</p>
     </div>
   );
 }
@@ -172,7 +148,7 @@ function Action({ text, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="text-sm px-3 py-2 rounded-lg border bg-blue-50 text-blue-700 hover:bg-blue-100 transition text-center"
+      className="w-full px-4 py-2 text-sm rounded-lg border bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
     >
       {text}
     </button>

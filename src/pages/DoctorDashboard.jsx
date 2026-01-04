@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   collection,
   query,
@@ -15,9 +15,7 @@ export default function DoctorDashboard() {
   const [appointments, setAppointments] = useState([]);
   const doctorId = auth.currentUser?.uid;
 
-  // 🔒 Track previous status to avoid double decrement
-  const prevStatusRef = useRef({});
-
+  /* 🔹 Fetch doctor appointments */
   useEffect(() => {
     if (!doctorId) return;
 
@@ -26,44 +24,40 @@ export default function DoctorDashboard() {
       where("doctorId", "==", doctorId)
     );
 
-    const unsub = onSnapshot(q, async (snap) => {
-      const updated = [];
-
-      for (const docSnap of snap.docs) {
-        const data = docSnap.data();
-        const prevStatus = prevStatusRef.current[docSnap.id];
-        const currentStatus = data.status;
-
-        /* 🔻 Decrease pending count for THIS patient */
-        if (
-          prevStatus === "requested" &&
-          ["approved", "rejected"].includes(currentStatus)
-        ) {
-          await updateDoc(doc(db, "patients", data.patientId), {
-            pendingAppointmentCount: increment(-1),
-          });
-        }
-
-        prevStatusRef.current[docSnap.id] = currentStatus;
-
-        updated.push({
-          id: docSnap.id,
-          ...data,
-        });
-      }
-
-      setAppointments(updated);
+    const unsub = onSnapshot(q, (snap) => {
+      setAppointments(
+        snap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }))
+      );
     });
 
     return () => unsub();
   }, [doctorId]);
 
-  /* 🔹 Doctor action */
-  const updateStatus = async (id, status) => {
-    await updateDoc(doc(db, "appointments", id), {
-      status,
-      updatedAt: serverTimestamp(),
-    });
+  /* 🔹 Update status (SINGLE SOURCE OF TRUTH) */
+  const updateStatus = async (appointment, newStatus) => {
+    try {
+      // 🔻 Decrease pending count ONLY ONCE
+      if (
+        appointment.status === "requested" &&
+        ["approved", "rejected"].includes(newStatus)
+      ) {
+        await updateDoc(doc(db, "patients", appointment.patientId), {
+          pendingAppointmentCount: increment(-1),
+        });
+      }
+
+      // 🔄 Update appointment status
+      await updateDoc(doc(db, "appointments", appointment.id), {
+        status: newStatus,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("Failed to update appointment status", error);
+      alert("Failed to update appointment");
+    }
   };
 
   return (
@@ -117,13 +111,13 @@ export default function DoctorDashboard() {
                   {a.status === "requested" && (
                     <>
                       <button
-                        onClick={() => updateStatus(a.id, "approved")}
+                        onClick={() => updateStatus(a, "approved")}
                         className="px-3 py-1 bg-green-600 text-white rounded text-xs"
                       >
                         Approve
                       </button>
                       <button
-                        onClick={() => updateStatus(a.id, "rejected")}
+                        onClick={() => updateStatus(a, "rejected")}
                         className="px-3 py-1 bg-red-500 text-white rounded text-xs"
                       >
                         Reject
@@ -133,7 +127,7 @@ export default function DoctorDashboard() {
 
                   {a.status === "approved" && (
                     <button
-                      onClick={() => updateStatus(a.id, "completed")}
+                      onClick={() => updateStatus(a, "completed")}
                       className="px-3 py-1 bg-blue-600 text-white rounded text-xs"
                     >
                       Mark Completed
