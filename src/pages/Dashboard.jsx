@@ -1,35 +1,76 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../utils/firebase";
 import { useAuth } from "../utils/useAuth";
 
 function Dashboard() {
   const { user } = useAuth();
+  const [patient, setPatient] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalAppointments: 0,
+    pendingAppointments: 0,
+  });
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchPatient = async () => {
+      try {
+        const ref = doc(db, "patients", user.uid);
+        const snap = await getDoc(ref);
+
+        if (snap.exists()) {
+          const data = snap.data(); // ✅ FIX HERE
+
+          setPatient(data);
+          setStats({
+            totalAppointments: data.appointmentCount ?? 0,
+            pendingAppointments: data.pendingAppointmentCount ?? 0,
+          });
+
+        }
+      } catch (err) {
+        console.error("Failed to fetch patient data", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatient();
+  }, [user]);
+
+  if (loading) {
+    return <div className="p-10 text-center text-gray-500">Loading dashboard…</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-12">
       {/* Welcome Header */}
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">
-          Welcome, <span className="text-purple-600">{user?.email}</span>
+          Welcome, <span className="text-purple-600">{patient?.personalInfo?.firstName || user?.email}</span>
         </h1>
-        
+
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        {stats.map((item, i) => (
-          <div
-            key={i}
-            className={`p-5 rounded-xl shadow-sm ${item.bg}`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">{item.label}</p>
-                <h2 className="text-2xl font-bold text-gray-900">0</h2>
-              </div>
-              <div className="text-3xl">{item.icon}</div>
-            </div>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
+        {/* Total Appointments */}
+        <StatCard
+          label="Total Appointments"
+          value={stats.totalAppointments}
+          icon="📅"
+          bg="bg-blue-50"
+        />
+
+        {/* Pending Appointments */}
+        <StatCard
+          label="Pending Appointments"
+          value={stats.pendingAppointments}
+          icon="⏳"
+          bg="bg-yellow-50"
+        />
       </div>
 
       {/* Main Content */}
@@ -115,26 +156,17 @@ function Dashboard() {
 
 export default Dashboard;
 
-/* 🧠 Stats config */
-const stats = [
-  {
-    label: "Total Appointments",
-    icon: "📅",
-    bg: "bg-blue-50",
-  },
-  {
-    label: "Cancelled",
-    icon: "❌",
-    bg: "bg-red-50",
-  },
-  {
-    label: "Pending",
-    icon: "⏳",
-    bg: "bg-yellow-50",
-  },
-  {
-    label: "Completed",
-    icon: "✅",
-    bg: "bg-green-50",
-  },
-];
+/* ================== Small Reusable Card ================== */
+function StatCard({ label, value, icon, bg }) {
+  return (
+    <div className={`p-6 rounded-xl shadow-sm ${bg}`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-gray-600">{label}</p>
+          <h2 className="text-3xl font-bold text-gray-900">{value}</h2>
+        </div>
+        <div className="text-3xl">{icon}</div>
+      </div>
+    </div>
+  );
+}

@@ -38,19 +38,20 @@ function PatientR() {
 
         if (snap.exists()) {
           const data = snap.data();
+
           setForm({
-            firstName: data.personalInfo.firstName || "",
-            lastName: data.personalInfo.lastName || "",
-            gender: data.personalInfo.gender || "",
-            dob: data.personalInfo.dob || "",
-            contact: data.personalInfo.contact || "",
-            address: data.personalInfo.address || "",
-            bloodGroup: data.medicalInfo.bloodGroup || "",
-            allergies: data.medicalInfo.allergies || "",
-            conditions: data.medicalInfo.conditions || "",
-            history: data.medicalInfo.history || "",
-            insuranceProvider: data.insurance.provider || "",
-            insuranceNumber: data.insurance.number || "",
+            firstName: data.personalInfo?.firstName || "",
+            lastName: data.personalInfo?.lastName || "",
+            gender: data.personalInfo?.gender || "",
+            dob: data.personalInfo?.dob || "",
+            contact: data.personalInfo?.contact || "",
+            address: data.personalInfo?.address || "",
+            bloodGroup: data.medicalInfo?.bloodGroup || "",
+            allergies: data.medicalInfo?.allergies || "",
+            conditions: data.medicalInfo?.conditions || "",
+            history: data.medicalInfo?.history || "",
+            insuranceProvider: data.insurance?.provider || "",
+            insuranceNumber: data.insurance?.number || "",
           });
 
           setIsEditMode(true);
@@ -62,9 +63,7 @@ function PatientR() {
       }
     };
 
-    if (!loading) {
-      fetchPatient();
-    }
+    if (!loading) fetchPatient();
   }, [user, loading]);
 
   if (loading || initialLoading) {
@@ -75,6 +74,7 @@ function PatientR() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  /* 🔹 Submit Registration / Update */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) return;
@@ -82,7 +82,6 @@ function PatientR() {
     setSubmitting(true);
 
     try {
-      /* Save / Update patient profile */
       await setDoc(
         doc(db, "patients", user.uid),
         {
@@ -104,13 +103,22 @@ function PatientR() {
             provider: form.insuranceProvider,
             number: form.insuranceNumber,
           },
+
+          /* 🔢 Initialize counters ONLY on first registration */
+          ...(isEditMode
+            ? {}
+            : {
+                appointmentCount: 0,
+                pendingAppointmentCount: 0,
+                createdAt: serverTimestamp(),
+              }),
+
           updatedAt: serverTimestamp(),
-          ...(isEditMode ? {} : { createdAt: serverTimestamp() }),
         },
         { merge: true }
       );
 
-      /* Ensure profile flag is set */
+      /* 🔹 Mark profile completed */
       await setDoc(
         doc(db, "users", user.uid),
         { isProfileCompleted: true },
@@ -136,12 +144,12 @@ function PatientR() {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Personal Info */}
           <Section title="Personal Information">
-            <Input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" />
-            <Input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" />
-            <Input name="contact" value={form.contact} onChange={handleChange} placeholder="Contact Number" />
-            <Input type="date" name="dob" value={form.dob} onChange={handleChange} />
-            <Select name="gender" value={form.gender} onChange={handleChange} />
-            <Input name="address" value={form.address} onChange={handleChange} placeholder="Address" className="md:col-span-2" />
+            <Input required name="firstName" value={form.firstName} onChange={handleChange} placeholder="First Name" />
+            <Input required name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last Name" />
+            <Input required name="contact" value={form.contact} onChange={handleChange} placeholder="Contact Number" />
+            <Input required type="date" name="dob" value={form.dob} onChange={handleChange} />
+            <Select required name="gender" value={form.gender} onChange={handleChange} />
+            <Input required name="address" value={form.address} onChange={handleChange} placeholder="Address" className="md:col-span-2" />
           </Section>
 
           {/* Medical Info */}
@@ -177,7 +185,7 @@ function PatientR() {
 
 export default PatientR;
 
-/* 🔹 Small reusable helpers */
+/* 🔹 Helpers */
 function Section({ title, children }) {
   return (
     <section>
@@ -198,18 +206,18 @@ function Input({ className = "", ...props }) {
   );
 }
 
-function Select({ value, onChange }) {
+function Select({ value, onChange, ...props }) {
   return (
     <select
-      name="gender"
+      {...props}
       value={value}
       onChange={onChange}
       className="w-full p-3 border rounded-lg outline-none focus:border-purple-500"
     >
       <option value="">Select Gender</option>
-      <option>Male</option>
-      <option>Female</option>
-      <option>Other</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+      <option value="Other">Other</option>
     </select>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   collection,
   query,
@@ -7,6 +7,7 @@ import {
   updateDoc,
   doc,
   serverTimestamp,
+  increment,
 } from "firebase/firestore";
 import { auth, db } from "../utils/firebase";
 import RequestAppointmentModal from "../components/RequestAppointmentModal";
@@ -14,6 +15,9 @@ import RequestAppointmentModal from "../components/RequestAppointmentModal";
 function Appointments() {
   const [appointments, setAppointments] = useState([]);
   const [open, setOpen] = useState(false);
+
+  // 🔹 Track previous statuses to avoid double decrement
+  const prevStatusRef = useRef({});
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -23,18 +27,43 @@ function Appointments() {
       where("patientId", "==", auth.currentUser.uid)
     );
 
-    const unsub = onSnapshot(q, (snap) => {
-      setAppointments(
-        snap.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        }))
-      );
+    const unsub = onSnapshot(q, async (snap) => {
+      const updatedAppointments = [];
+
+      for (const docSnap of snap.docs) {
+        const data = docSnap.data();
+        const prevStatus = prevStatusRef.current[docSnap.id];
+        const currentStatus = data.status;
+
+        /* 🔻 Decrease pending count when status changes
+           requested → approved / rejected / withdrawn */
+        if (
+          prevStatus === "requested" &&
+          ["approved", "rejected", "withdrawn"].includes(currentStatus)
+        ) {
+          await updateDoc(
+            doc(db, "patients", auth.currentUser.uid),
+            {
+              pendingAppointmentCount: increment(-1),
+            }
+          );
+        }
+
+        prevStatusRef.current[docSnap.id] = currentStatus;
+
+        updatedAppointments.push({
+          id: docSnap.id,
+          ...data,
+        });
+      }
+
+      setAppointments(updatedAppointments);
     });
 
     return () => unsub();
   }, []);
 
+  /* 🔹 Withdraw Appointment (Patient Action) */
   const withdrawAppointment = async (appointmentId) => {
     const confirmWithdraw = window.confirm(
       "Are you sure you want to withdraw this appointment?"
@@ -87,8 +116,7 @@ function Appointments() {
                 </td>
 
                 <td className="p-2 text-center">
-                  {(a.status === "requested" ||
-                    a.status === "approved") && (
+                  {a.status === "requested" && (
                     <button
                       onClick={() => withdrawAppointment(a.id)}
                       className="px-3 py-1 bg-red-500 text-white rounded text-xs"
@@ -97,9 +125,11 @@ function Appointments() {
                     </button>
                   )}
 
-                  {a.status === "withdrawn" && (
-                    <span className="text-gray-500 text-xs">
-                      Withdrawn
+                  {["approved", "rejected", "withdrawn"].includes(
+                    a.status
+                  ) && (
+                    <span className="text-gray-500 text-xs capitalize">
+                      {a.status}
                     </span>
                   )}
                 </td>
@@ -116,13 +146,12 @@ function Appointments() {
   );
 }
 
-/* 🔹 Status Badge Component */
+/* 🔹 Status Badge */
 function StatusBadge({ status }) {
   const styles = {
     requested: "bg-yellow-100 text-yellow-700",
     approved: "bg-green-100 text-green-700",
     rejected: "bg-red-100 text-red-700",
-    completed: "bg-blue-100 text-blue-700",
     withdrawn: "bg-gray-100 text-gray-600",
   };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   collection,
   query,
@@ -6,12 +6,17 @@ import {
   onSnapshot,
   updateDoc,
   doc,
+  increment,
+  serverTimestamp,
 } from "firebase/firestore";
 import { auth, db } from "../utils/firebase";
 
 export default function DoctorDashboard() {
   const [appointments, setAppointments] = useState([]);
   const doctorId = auth.currentUser?.uid;
+
+  // 🔒 Track previous status to avoid double decrement
+  const prevStatusRef = useRef({});
 
   useEffect(() => {
     if (!doctorId) return;
@@ -21,20 +26,44 @@ export default function DoctorDashboard() {
       where("doctorId", "==", doctorId)
     );
 
-    const unsub = onSnapshot(q, (snap) => {
-      setAppointments(
-        snap.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        }))
-      );
+    const unsub = onSnapshot(q, async (snap) => {
+      const updated = [];
+
+      for (const docSnap of snap.docs) {
+        const data = docSnap.data();
+        const prevStatus = prevStatusRef.current[docSnap.id];
+        const currentStatus = data.status;
+
+        /* 🔻 Decrease pending count for THIS patient */
+        if (
+          prevStatus === "requested" &&
+          ["approved", "rejected"].includes(currentStatus)
+        ) {
+          await updateDoc(doc(db, "patients", data.patientId), {
+            pendingAppointmentCount: increment(-1),
+          });
+        }
+
+        prevStatusRef.current[docSnap.id] = currentStatus;
+
+        updated.push({
+          id: docSnap.id,
+          ...data,
+        });
+      }
+
+      setAppointments(updated);
     });
 
     return () => unsub();
   }, [doctorId]);
 
+  /* 🔹 Doctor action */
   const updateStatus = async (id, status) => {
-    await updateDoc(doc(db, "appointments", id), { status });
+    await updateDoc(doc(db, "appointments", id), {
+      status,
+      updatedAt: serverTimestamp(),
+    });
   };
 
   return (
@@ -67,32 +96,23 @@ export default function DoctorDashboard() {
 
             {appointments.map((a, index) => (
               <tr key={a.id} className="border-t">
-                {/* Serial */}
                 <td className="p-3">{index + 1}</td>
-
-                {/* Patient */}
                 <td className="p-3">{a.patientName || "N/A"}</td>
                 <td className="p-3">{a.patientPhone || "-"}</td>
 
-                {/* Timestamp */}
                 <td className="p-3">
                   {a.createdAt?.toDate
                     ? a.createdAt.toDate().toLocaleString()
                     : "-"}
                 </td>
 
-                {/* Date */}
                 <td className="p-3">{a.date}</td>
-
-                {/* Reason */}
                 <td className="p-3">{a.appointmentType}</td>
 
-                {/* Status */}
                 <td className="p-3 text-center">
                   <StatusBadge status={a.status} />
                 </td>
 
-                {/* Actions */}
                 <td className="p-3 text-center space-x-2">
                   {a.status === "requested" && (
                     <>
@@ -120,9 +140,9 @@ export default function DoctorDashboard() {
                     </button>
                   )}
 
-                  {a.status === "withdrawn" && (
-                    <span className="text-xs text-gray-500">
-                      Withdrawn by patient
+                  {["rejected", "withdrawn"].includes(a.status) && (
+                    <span className="text-xs text-gray-500 capitalize">
+                      {a.status}
                     </span>
                   )}
                 </td>

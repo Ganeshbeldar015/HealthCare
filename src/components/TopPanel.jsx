@@ -42,10 +42,10 @@ function TopPanel() {
 
           {/* Left: Logo */}
           <div
-            onClick={() => navigate('/')}
+            // onClick={() => navigate('/')}
             className="text-lg font-bold text-gray-800 cursor-pointer hover:text-purple-600 transition"
           >
-            🚀 Home 
+            🚀 HealthCure
           </div>
 
           {/* Right: User icon and text, flush right */}
