@@ -8,6 +8,8 @@ import {
   query,
   where,
   serverTimestamp,
+  updateDoc,
+  increment,
 } from "firebase/firestore";
 import { auth, db } from "../utils/firebase";
 
@@ -30,8 +32,7 @@ function RequestAppointmentModal({ onClose }) {
     note: "",
   });
 
-
-  /* 🔹 Fetch ONLY APPROVED doctors */
+  /* 🔹 Fetch ONLY approved doctors */
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
@@ -41,13 +42,12 @@ function RequestAppointmentModal({ onClose }) {
         );
 
         const snapshot = await getDocs(q);
-
-        const list = snapshot.docs.map((doc) => ({
-          id: doc.id, // ⚠️ MUST MATCH auth.uid
-          ...doc.data(),
-        }));
-
-        setDoctors(list);
+        setDoctors(
+          snapshot.docs.map((d) => ({
+            id: d.id,
+            ...d.data(),
+          }))
+        );
       } catch (error) {
         console.error("Failed to fetch doctors:", error);
       }
@@ -57,64 +57,65 @@ function RequestAppointmentModal({ onClose }) {
   }, []);
 
   /* 🔹 Submit Appointment Request */
-
-const submitRequest = async () => {
-  if (!form.doctorId || !form.appointmentType || !form.date) {
-    alert("Please fill all required fields");
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    // 🔹 Fetch patient profile
-    const patientRef = doc(db, "patients", auth.currentUser.uid);
-    const patientSnap = await getDoc(patientRef);
-
-    if (!patientSnap.exists()) {
-      alert("Patient profile not found. Please complete registration.");
-      setLoading(false);
+  const submitRequest = async () => {
+    if (!form.doctorId || !form.appointmentType || !form.date) {
+      alert("Please fill all required fields");
       return;
     }
 
-    const patient = patientSnap.data();
+    setLoading(true);
 
-    const patientName = `${patient.personalInfo.firstName} ${patient.personalInfo.lastName}`;
-    const patientPhone = patient.personalInfo.contact;
+    try {
+      const patientRef = doc(db, "patients", auth.currentUser.uid);
+      const patientSnap = await getDoc(patientRef);
 
-    // 🧾 Create appointment
-    await addDoc(collection(db, "appointments"), {
-      patientId: auth.currentUser.uid,
-      patientName,
-      patientPhone,
-      doctorId: form.doctorId,
-      doctorName: form.doctorName,
-      appointmentType: form.appointmentType,
-      date: form.date,
-      note: form.note || "",
-      status: "requested",
-      createdAt: serverTimestamp(),
-    });
+      if (!patientSnap.exists()) {
+        alert("Patient profile not found. Please complete registration.");
+        setLoading(false);
+        return;
+      }
 
-    // 🔔 Notify doctor
-    await addDoc(collection(db, "notifications"), {
-      userId: form.doctorId,
-      title: "New Appointment Request",
-      message: `New appointment request from ${patientName}`,
-      read: false,
-      createdAt: serverTimestamp(),
-    });
+      const patient = patientSnap.data();
+      const patientName = `${patient.personalInfo.firstName} ${patient.personalInfo.lastName}`;
+      const patientPhone = patient.personalInfo.contact;
 
-    onClose();
-  } catch (err) {
-    console.error(err);
-    alert("Failed to submit request");
-  } finally {
-    setLoading(false);
-  }
-};
+      /* 🧾 Create appointment */
+      await addDoc(collection(db, "appointments"), {
+        patientId: auth.currentUser.uid,
+        patientName,
+        patientPhone,
+        doctorId: form.doctorId,
+        doctorName: form.doctorName,
+        appointmentType: form.appointmentType,
+        date: form.date,
+        note: form.note || "",
+        status: "requested",
+        createdAt: serverTimestamp(),
+      });
 
+      /* 🔢 Update patient counters */
+      await updateDoc(patientRef, {
+        appointmentCount: increment(1),
+        pendingAppointmentCount: increment(1),
+      });
 
+      /* 🔔 Notify doctor */
+      await addDoc(collection(db, "notifications"), {
+        userId: form.doctorId,
+        title: "New Appointment Request",
+        message: `New appointment request from ${patientName}`,
+        read: false,
+        createdAt: serverTimestamp(),
+      });
+
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit request");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex justify-end z-50">
@@ -122,27 +123,19 @@ const submitRequest = async () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Request Appointment</h2>
-          <button onClick={onClose} className="text-gray-500 text-xl">
-            ✕
-          </button>
+          <button onClick={onClose} className="text-gray-500 text-xl">✕</button>
         </div>
 
-        {/* Doctor Dropdown */}
-        <label className="block text-sm font-medium mb-1">
-          Select Doctor
-        </label>
+        {/* Doctor */}
+        <label className="block text-sm font-medium mb-1">Select Doctor</label>
         <select
           className="w-full border rounded-lg p-3 mb-4"
           value={form.doctorId}
           onChange={(e) => {
-            const selectedId = e.target.value;
-            const selectedDoctor = doctors.find(
-              (d) => d.id === selectedId
-            );
-
+            const selectedDoctor = doctors.find(d => d.id === e.target.value);
             if (!selectedDoctor) return;
 
-            setForm((prev) => ({
+            setForm(prev => ({
               ...prev,
               doctorId: selectedDoctor.id,
               doctorName: selectedDoctor.name,
@@ -150,17 +143,15 @@ const submitRequest = async () => {
           }}
         >
           <option value="">-- Select Doctor --</option>
-          {doctors.map((doc) => (
+          {doctors.map(doc => (
             <option key={doc.id} value={doc.id}>
               {doc.name} — {doc.specialization}
             </option>
           ))}
         </select>
 
-        {/* Appointment Type */}
-        <label className="block text-sm font-medium mb-1">
-          Appointment Type
-        </label>
+        {/* Type */}
+        <label className="block text-sm font-medium mb-1">Appointment Type</label>
         <select
           className="w-full border rounded-lg p-3 mb-4"
           value={form.appointmentType}
@@ -169,17 +160,13 @@ const submitRequest = async () => {
           }
         >
           <option value="">-- Select Type --</option>
-          {APPOINTMENT_TYPES.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
+          {APPOINTMENT_TYPES.map(type => (
+            <option key={type} value={type}>{type}</option>
           ))}
         </select>
 
         {/* Date */}
-        <label className="block text-sm font-medium mb-1">
-          Appointment Date
-        </label>
+        <label className="block text-sm font-medium mb-1">Appointment Date</label>
         <input
           type="date"
           className="w-full border rounded-lg p-3 mb-4"
@@ -203,7 +190,6 @@ const submitRequest = async () => {
           }
         />
 
-        {/* Submit */}
         <button
           onClick={submitRequest}
           disabled={loading}
@@ -216,7 +202,4 @@ const submitRequest = async () => {
   );
 }
 
-
 export default RequestAppointmentModal;
-
-
