@@ -99,11 +99,14 @@ function RequestAppointmentModal({ onClose }) {
         pendingAppointmentCount: increment(1),
       });
 
-      /* 🔔 Notify doctor */
+      // 🔔 Notify doctor
       await addDoc(collection(db, "notifications"), {
         userId: form.doctorId,
-        title: "New Appointment Request",
-        message: `New appointment request from ${patientName}`,
+        role: "doctor",
+        type: "appointment",
+        title: "New Appointment",
+        message: `New appointment for ${form.date} from ${patientName}`,
+        appointmentDate: form.date,
         read: false,
         createdAt: serverTimestamp(),
       });

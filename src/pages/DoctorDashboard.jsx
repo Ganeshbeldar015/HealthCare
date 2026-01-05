@@ -6,9 +6,11 @@ import {
   onSnapshot,
   updateDoc,
   doc,
+  addDoc,
   increment,
   serverTimestamp,
 } from "firebase/firestore";
+
 import { auth, db } from "../utils/firebase";
 
 export default function DoctorDashboard() {
@@ -56,6 +58,42 @@ export default function DoctorDashboard() {
       });
     } catch (error) {
       console.error("Failed to update appointment status", error);
+      alert("Failed to update appointment");
+    }
+  };
+
+  const updateAppointmentStatus = async (appointment, status) => {
+    try {
+      // 1️⃣ Update appointment
+      await updateDoc(doc(db, "appointments", appointment.id), {
+        status,
+        updatedAt: serverTimestamp(),
+      });
+
+      // 2️⃣ Notify patient
+      let message = "";
+
+      if (status === "approved") {
+        message = `Appointment with Dr. ${appointment.doctorName} is approved for ${appointment.date}`;
+      }
+
+      if (status === "rejected") {
+        message = `Appointment with Dr. ${appointment.doctorName} on ${appointment.date} was rejected`;
+      }
+
+      await addDoc(collection(db, "notifications"), {
+        userId: appointment.patientId,
+        role: "patient",
+        type: "appointment",
+        title: "Appointment Update",
+        message,
+        appointmentDate: appointment.date,
+        read: false,
+        createdAt: serverTimestamp(),
+      });
+
+    } catch (err) {
+      console.error("Status update failed", err);
       alert("Failed to update appointment");
     }
   };
@@ -161,9 +199,8 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`px-3 py-1 rounded-full text-xs font-medium ${
-        styles[status] || "bg-gray-100 text-gray-600"
-      }`}
+      className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-600"
+        }`}
     >
       {status}
     </span>

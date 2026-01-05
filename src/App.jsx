@@ -12,6 +12,7 @@ import PatientR from "./pages/PatientR";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Appointments from "./pages/Appointments";
+import Notifications from "./pages/Notifications";
 
 /* Doctor */
 import DoctorSignup from "./pages/DoctorSignup";
@@ -83,7 +84,7 @@ function App() {
             <Route path="/records" element={<div>Records</div>} />
             <Route path="/prescription" element={<div>Prescription</div>} />
             <Route path="/billing" element={<div>Billing</div>} />
-            <Route path="/notifications" element={<div>Notifications</div>} />
+
           </Route>
 
           {/* 👨‍⚕️ DOCTOR FLOW */}
@@ -92,6 +93,15 @@ function App() {
             element={
               <ProtectedRoute role="doctor">
                 <DoctorForm />
+              </ProtectedRoute>
+            }
+          />
+          {/* 🔔 Notifications (Doctor + Patient) */}
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <Notifications />
               </ProtectedRoute>
             }
           />
