@@ -10,14 +10,13 @@ import {
   increment,
   serverTimestamp,
 } from "firebase/firestore";
-
 import { auth, db } from "../utils/firebase";
 
 export default function DoctorDashboard() {
   const [appointments, setAppointments] = useState([]);
   const doctorId = auth.currentUser?.uid;
 
-  /* 🔹 Fetch doctor appointments */
+  /* 🔹 Fetch appointments for this doctor */
   useEffect(() => {
     if (!doctorId) return;
 
@@ -38,62 +37,61 @@ export default function DoctorDashboard() {
     return () => unsub();
   }, [doctorId]);
 
-  /* 🔹 Update status (SINGLE SOURCE OF TRUTH) */
-  const updateStatus = async (appointment, newStatus) => {
+  /* 🔹 APPROVE / REJECT / COMPLETE */
+  const updateAppointmentStatus = async (appointment, newStatus) => {
     try {
-      // 🔻 Decrease pending count ONLY ONCE
-      if (
-        appointment.status === "requested" &&
-        ["approved", "rejected"].includes(newStatus)
-      ) {
-        await updateDoc(doc(db, "patients", appointment.patientId), {
+      const appointmentRef = doc(db, "appointments", appointment.id);
+      const patientRef = doc(db, "patients", appointment.patientId);
+
+      /* 1️⃣ Update appointment status */
+      await updateDoc(appointmentRef, {
+        status: newStatus,
+        updatedAt: serverTimestamp(),
+      });
+
+      /* 2️⃣ Update patient counters */
+      if (appointment.status === "requested") {
+        // moving OUT of pending
+        await updateDoc(patientRef, {
           pendingAppointmentCount: increment(-1),
         });
       }
 
-      // 🔄 Update appointment status
-      await updateDoc(doc(db, "appointments", appointment.id), {
-        status: newStatus,
-        updatedAt: serverTimestamp(),
-      });
-    } catch (error) {
-      console.error("Failed to update appointment status", error);
-      alert("Failed to update appointment");
-    }
-  };
+      if (newStatus === "approved") {
+        await updateDoc(patientRef, {
+          appointmentCount: increment(1),
+        });
+      }
 
-  const updateAppointmentStatus = async (appointment, status) => {
-    try {
-      // 1️⃣ Update appointment
-      await updateDoc(doc(db, "appointments", appointment.id), {
-        status,
-        updatedAt: serverTimestamp(),
-      });
-
-      // 2️⃣ Notify patient
+      /* 3️⃣ Send notification */
       let message = "";
 
-      if (status === "approved") {
-        message = `Appointment with Dr. ${appointment.doctorName} is approved for ${appointment.date}`;
+      if (newStatus === "approved") {
+        message = `Your appointment with Dr. ${appointment.doctorName} is approved on ${appointment.date}`;
       }
 
-      if (status === "rejected") {
-        message = `Appointment with Dr. ${appointment.doctorName} on ${appointment.date} was rejected`;
+      if (newStatus === "rejected") {
+        message = `Your appointment with Dr. ${appointment.doctorName} on ${appointment.date} was rejected`;
       }
 
-      await addDoc(collection(db, "notifications"), {
-        userId: appointment.patientId,
-        role: "patient",
-        type: "appointment",
-        title: "Appointment Update",
-        message,
-        appointmentDate: appointment.date,
-        read: false,
-        createdAt: serverTimestamp(),
-      });
+      if (newStatus === "completed") {
+        message = `Your appointment with Dr. ${appointment.doctorName} on ${appointment.date} is completed`;
+      }
+
+      if (message) {
+        await addDoc(collection(db, "notifications"), {
+          userId: appointment.patientId,
+          role: "patient",
+          title: "Appointment Update",
+          message,
+          appointmentId: appointment.id,
+          read: false,
+          createdAt: serverTimestamp(),
+        });
+      }
 
     } catch (err) {
-      console.error("Status update failed", err);
+      console.error("Failed to update appointment:", err);
       alert("Failed to update appointment");
     }
   };
@@ -149,13 +147,18 @@ export default function DoctorDashboard() {
                   {a.status === "requested" && (
                     <>
                       <button
-                        onClick={() => updateStatus(a, "approved")}
+                        onClick={() =>
+                          updateAppointmentStatus(a, "approved")
+                        }
                         className="px-3 py-1 bg-green-600 text-white rounded text-xs"
                       >
                         Approve
                       </button>
+
                       <button
-                        onClick={() => updateStatus(a, "rejected")}
+                        onClick={() =>
+                          updateAppointmentStatus(a, "rejected")
+                        }
                         className="px-3 py-1 bg-red-500 text-white rounded text-xs"
                       >
                         Reject
@@ -165,18 +168,22 @@ export default function DoctorDashboard() {
 
                   {a.status === "approved" && (
                     <button
-                      onClick={() => updateStatus(a, "completed")}
+                      onClick={() =>
+                        updateAppointmentStatus(a, "completed")
+                      }
                       className="px-3 py-1 bg-blue-600 text-white rounded text-xs"
                     >
                       Mark Completed
                     </button>
                   )}
 
-                  {["rejected", "withdrawn"].includes(a.status) && (
-                    <span className="text-xs text-gray-500 capitalize">
-                      {a.status}
-                    </span>
-                  )}
+                  {["rejected", "withdrawn", "completed"].includes(
+                    a.status
+                  ) && (
+                      <span className="text-xs text-gray-500 capitalize">
+                        {a.status}
+                      </span>
+                    )}
                 </td>
               </tr>
             ))}
@@ -187,7 +194,7 @@ export default function DoctorDashboard() {
   );
 }
 
-/* 🔹 Status Badge */
+/* 🔹 STATUS BADGE */
 function StatusBadge({ status }) {
   const styles = {
     requested: "bg-yellow-100 text-yellow-700",

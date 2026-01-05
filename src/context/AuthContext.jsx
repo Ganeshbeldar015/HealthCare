@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth, db } from "../utils/firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../utils/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 const AuthContext = createContext();
@@ -22,16 +22,10 @@ export function AuthProvider({ children }) {
       setUser(firebaseUser);
 
       try {
-        const ref = doc(db, "users", firebaseUser.uid);
-        const snap = await getDoc(ref);
-
-        if (snap.exists()) {
-          setUserData(snap.data());
-        } else {
-          setUserData(null);
-        }
-      } catch (err) {
-        console.error("AuthContext error:", err);
+        const snap = await getDoc(doc(db, "users", firebaseUser.uid));
+        setUserData(snap.exists() ? snap.data() : null);
+      } catch (e) {
+        console.error("Failed to load userData", e);
         setUserData(null);
       }
 
@@ -48,6 +42,4 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);

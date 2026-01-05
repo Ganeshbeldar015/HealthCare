@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth , db} from '../utils/firebase';
+import { auth, db } from '../utils/firebase';
 import { useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { doc, getDoc } from "firebase/firestore";
@@ -74,12 +74,18 @@ function Login() {
 
       // 🔁 ROLE-BASED REDIRECTION
       if (userData.role === "patient") {
-        if (!userData.profileCompleted) {
-          navigate("/patientR");
-        } else {
+        const patientRef = doc(db, "patients", user.uid);
+        const patientSnap = await getDoc(patientRef);
+
+        if (patientSnap.exists()) {
+          // ✅ Patient already registered
           navigate("/dashboard");
+        } else {
+          // ❌ Registration not done
+          navigate("/patientR");
         }
       }
+
 
       else if (userData.role === "doctor") {
         const doctorRef = doc(db, "doctors", user.uid);

@@ -65,6 +65,7 @@ function Profile() {
             Registered Patient
           </span>
         </div>
+        <div ><Action text="Edit Profile" onClick={() => navigate("/patientR")} /> </div>
       </div>
 
       {/* ================= Profile Details ================= */}
