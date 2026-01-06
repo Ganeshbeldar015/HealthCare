@@ -66,7 +66,6 @@ function Dashboard() {
           collection(db, "doctors"),
           where("status", "==", "approved")
         );
-
         const snap = await getDocs(q);
         setDoctors(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
       } catch (err) {
@@ -86,74 +85,70 @@ function Dashboard() {
         const q = query(
           collection(db, "appointments"),
           where("patientId", "==", user.uid),
-          where("status", "==", "approved"),   // ✅ REQUIRED
+          where("status", "==", "approved"),
           orderBy("createdAt", "desc"),
           limit(5)
         );
 
         const snap = await getDocs(q);
-
-        const list = snap.docs.map(d => ({
-          id: d.id,
-          ...d.data(),
-        }));
-
-        console.log("Approved appointments:", list); // 🔍 debug
-        setRecentAppointments(list);
+        setRecentAppointments(
+          snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+        );
       } catch (err) {
         console.error("Failed to fetch recent appointments", err);
       }
     };
-
 
     fetchRecentAppointments();
   }, [user]);
 
   if (loading) {
     return (
-      <div className="p-10 text-center text-gray-500">
+      <div className="min-h-screen flex items-center justify-center text-slate-500">
         Loading dashboard…
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-12 px-4">
+    <div className="min-h-screen bg-slate-50 pt-16 px-6">
       {/* ================= HEADER ================= */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
+      <div className="mb-10">
+        <h1 className="text-3xl font-extrabold text-slate-900">
           Welcome,{" "}
-          <span className="text-purple-600">
+          <span className="text-emerald-600">
             {patient?.personalInfo?.firstName || user?.email}
           </span>
         </h1>
+        <p className="text-slate-500 mt-1">
+          Here’s a quick overview of your healthcare activity
+        </p>
       </div>
 
       {/* ================= STATS ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
         <StatCard
           label="Total Appointments"
           value={stats.totalAppointments}
           icon="📅"
-          bg="bg-blue-50"
+          bg="from-emerald-50 to-cyan-50"
         />
-
         <StatCard
           label="Pending Appointments"
           value={stats.pendingAppointments}
           icon="⏳"
-          bg="bg-yellow-50"
+          bg="from-yellow-50 to-orange-50"
         />
       </div>
 
       {/* ================= RECENT APPROVED ================= */}
-      <div className="bg-white rounded-xl shadow p-6 mb-8">
-        <h2 className="font-semibold text-gray-800 mb-4">
-          Recent Approved Appointments (*Coming soon)
+      <div className="bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow mb-10 p-6">
+        <h2 className="font-bold text-slate-800 mb-4">
+          Recent Approved Appointments
         </h2>
 
         {recentAppointments.length === 0 ? (
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-slate-400">
             No approved appointments yet
           </p>
         ) : (
@@ -161,18 +156,17 @@ function Dashboard() {
             {recentAppointments.map((a) => (
               <div
                 key={a.id}
-                className="flex justify-between items-center p-3 rounded-lg bg-gray-50"
+                className="flex justify-between items-center p-4 rounded-xl bg-slate-50 border border-slate-200"
               >
                 <div>
-                  <p className="font-medium text-gray-800">
+                  <p className="font-semibold text-slate-800">
                     Dr. {a.doctorName}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-slate-500">
                     {a.appointmentType} • {a.date}
                   </p>
                 </div>
-
-                <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
                   Approved
                 </span>
               </div>
@@ -182,53 +176,53 @@ function Dashboard() {
       </div>
 
       {/* ================= MAIN GRID ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* LEFT */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-xl shadow p-6 h-64 flex items-center justify-center text-gray-400">
+          <div className="bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow p-6 h-64 flex items-center justify-center text-slate-400">
             Appointments Activity (Chart coming soon)
           </div>
-          {/* Reviews */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="font-semibold text-gray-800 mb-4">
+
+          <div className="bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow p-6">
+            <h2 className="font-bold text-slate-800 mb-2">
               Patient Reviews
             </h2>
-            <p className="text-gray-400 text-sm">No reviews yet</p>
+            <p className="text-sm text-slate-400">No reviews yet</p>
           </div>
-
         </div>
 
         {/* RIGHT */}
         <div className="space-y-6">
-          {/* Doctors */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="font-semibold text-gray-800 mb-4">
+          <div className="bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow p-6">
+            <h2 className="font-bold text-slate-800 mb-4">
               Available Doctors
             </h2>
 
             {doctors.length === 0 ? (
-              <p className="text-sm text-gray-400">No doctors available</p>
+              <p className="text-sm text-slate-400">
+                No doctors available
+              </p>
             ) : (
               <div className="space-y-3">
                 {doctors.map((doc) => (
                   <div
                     key={doc.id}
-                    className="flex items-center gap-4 p-3 rounded-lg bg-gray-50"
+                    className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200"
                   >
-                    <div className="w-10 h-10 flex items-center justify-center rounded-full bg-purple-600 text-white font-bold">
+                    <div className="w-11 h-11 flex items-center justify-center rounded-full bg-emerald-600 text-white font-bold">
                       {doc.name?.charAt(0) || "D"}
                     </div>
 
                     <div className="flex-1">
-                      <p className="font-medium text-gray-800">
+                      <p className="font-semibold text-slate-800">
                         {doc.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-slate-500">
                         {doc.specialization} • {doc.experience} yrs
                       </p>
                     </div>
 
-                    <span className="text-xs px-3 py-1 rounded-full bg-green-100 text-green-700">
+                    <span className="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold">
                       Available
                     </span>
                   </div>
@@ -236,8 +230,6 @@ function Dashboard() {
               </div>
             )}
           </div>
-
-
         </div>
       </div>
     </div>
@@ -249,11 +241,15 @@ export default Dashboard;
 /* ================= STAT CARD ================= */
 function StatCard({ label, value, icon, bg }) {
   return (
-    <div className={`p-6 rounded-xl shadow-sm ${bg}`}>
+    <div
+      className={`p-6 rounded-2xl shadow bg-gradient-to-br ${bg} border border-slate-200`}
+    >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-600">{label}</p>
-          <h2 className="text-3xl font-bold text-gray-900">{value}</h2>
+          <p className="text-sm text-slate-600">{label}</p>
+          <h2 className="text-3xl font-extrabold text-slate-900">
+            {value}
+          </h2>
         </div>
         <div className="text-3xl">{icon}</div>
       </div>

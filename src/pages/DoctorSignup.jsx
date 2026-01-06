@@ -7,6 +7,8 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import BackToWelcome from "../components/BackToWelcome";
+
 
 function DoctorSignup() {
   const [email, setEmail] = useState("");
@@ -56,7 +58,6 @@ function DoctorSignup() {
     setLoading(true);
 
     try {
-      // 🔐 Create auth user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -65,10 +66,8 @@ function DoctorSignup() {
 
       const user = userCredential.user;
 
-      // 📧 Email verification
       await sendEmailVerification(user);
 
-      // 🔥 USERS collection (role = doctor)
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
@@ -77,21 +76,19 @@ function DoctorSignup() {
         createdAt: serverTimestamp(),
       });
 
-      // 🩺 DOCTORS collection (status = waiting)
       await setDoc(doc(db, "doctors", user.uid), {
         uid: user.uid,
         email: user.email,
-        status: "waiting", // waiting | approved | rejected
+        status: "waiting",
         createdAt: serverTimestamp(),
       });
 
       setMessage({
         text:
-          "✅ Doctor account created! Please verify your email. After completing your profile, wait for admin approval.",
+          "Doctor account created! Please verify your email and complete your profile. Admin approval is required.",
         type: "success",
       });
 
-      // Redirect to doctor form
       setTimeout(() => navigate("/doctor-form"), 3000);
     } catch (error) {
       setMessage({
@@ -104,26 +101,34 @@ function DoctorSignup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-12">
-      {/* Background blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 rounded-full blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 px-4">
+      {/* Background Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px] opacity-30" />
 
-      <div className="relative z-10 w-full max-w-md">
+      <div className="relative w-full max-w-md">
+        <BackToWelcome className="absolute top-6 left-6" />
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold">
+              +
+            </div>
+            <span className="text-xl font-semibold text-emerald-700">
+              MediConnect
+            </span>
+          </div>
+
+          <h1 className="text-3xl font-bold text-gray-900">
             Doctor Registration
           </h1>
           <p className="text-gray-600 mt-2">
-            Register as a healthcare professional
+            Join as a healthcare professional
           </p>
         </div>
 
-        {/* Form */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8">
+
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-8">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -133,88 +138,102 @@ function DoctorSignup() {
           >
             {message.text && (
               <div
-                className={`px-4 py-3 rounded-xl text-sm ${
-                  message.type === "error"
-                    ? "bg-red-50 text-red-700 border border-red-200"
-                    : "bg-green-50 text-green-700 border border-green-200"
-                }`}
+                className={`p-3 rounded-lg text-sm ${message.type === "error"
+                  ? "bg-red-50 text-red-700 border border-red-200"
+                  : "bg-green-50 text-green-700 border border-green-200"
+                  }`}
               >
                 {message.text}
               </div>
             )}
 
             {/* Email */}
-            <input
-              type="email"
-              placeholder="Email address"
-              className="w-full px-4 py-3 rounded-xl border"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
             {/* Password */}
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                className="w-full px-4 py-3 pr-12 rounded-xl border"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="absolute right-4 top-1/2 -translate-y-1/2"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeSlashIcon className="h-5 w-5" />
-                ) : (
-                  <EyeIcon className="h-5 w-5" />
-                )}
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  className="w-full px-4 py-3 border rounded-lg pr-12 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Confirm Password */}
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm password"
-                className="w-full px-4 py-3 pr-12 rounded-xl border"
-                value={confirmPassword}
-                onChange={(e) =>
-                  setConfirmPassword(e.target.value)
-                }
-              />
-              <button
-                type="button"
-                className="absolute right-4 top-1/2 -translate-y-1/2"
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
-              >
-                {showConfirmPassword ? (
-                  <EyeSlashIcon className="h-5 w-5" />
-                ) : (
-                  <EyeIcon className="h-5 w-5" />
-                )}
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  className="w-full px-4 py-3 border rounded-lg pr-12 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  value={confirmPassword}
+                  onChange={(e) =>
+                    setConfirmPassword(e.target.value)
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >
+                  {showConfirmPassword ? (
+                    <EyeSlashIcon className="h-5 w-5" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl font-semibold"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold transition disabled:opacity-50"
             >
-              {loading ? "Creating Account..." : "Register as Doctor"}
+              {loading ? "Creating Account..." : "Create Doctor Account"}
             </button>
 
-            <p className="text-center text-sm">
+            <p className="text-center text-sm text-gray-600">
               Already have an account?{" "}
               <button
                 type="button"
                 onClick={() => navigate("/login")}
-                className="text-purple-600 underline"
+                className="text-emerald-600 font-medium hover:underline"
               >
                 Sign in
               </button>

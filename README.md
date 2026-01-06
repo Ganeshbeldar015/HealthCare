@@ -72,6 +72,8 @@ Run locally
 
 bash
 Copy code
+npm install lucide-react
+npm install framer-motion
 npm run dev   # or npm start (depending on your setup)
 Use the App
 

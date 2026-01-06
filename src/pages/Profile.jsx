@@ -30,7 +30,7 @@ function Profile() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64 text-gray-500">
+      <div className="flex justify-center items-center h-64 text-slate-500">
         Loading profile...
       </div>
     );
@@ -38,7 +38,7 @@ function Profile() {
 
   if (!patient) {
     return (
-      <div className="text-center text-gray-500 p-6">
+      <div className="text-center text-slate-500 p-6">
         No profile data found
       </div>
     );
@@ -47,112 +47,102 @@ function Profile() {
   const { personalInfo, medicalInfo } = patient;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-6 pt-2 pb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-      {/* ================= Profile Header ================= */}
-      <div className="bg-white border rounded-2xl p-6 flex items-center gap-6">
-        <div className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold">
-          {personalInfo.firstName?.[0]}
-          {personalInfo.lastName?.[0]}
-        </div>
+        {/* ================= MAIN CONTENT ================= */}
+        <div className="lg:col-span-2 space-y-6">
 
-        <div>
-          <h2 className="text-2xl font-semibold text-gray-800">
-            {personalInfo.firstName} {personalInfo.lastName}
-          </h2>
-          <p className="text-sm text-gray-500">{user.email}</p>
-          <span className="inline-block mt-2 px-3 py-1 text-xs rounded-full bg-green-100 text-green-700">
-            Registered Patient
-          </span>
-        </div>
-        <div ><Action text="Edit Profile" onClick={() => navigate("/patientR")} /> </div>
-      </div>
+          {/* Medical Records – MAIN FOCUS */}
+          <div className="bg-white border border-emerald-100 rounded-2xl p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">
+              Medical Records
+            </h2>
 
-      {/* ================= Profile Details ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* -------- Personal Information -------- */}
-        <div className="bg-white border rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
-            Personal Information
-          </h3>
-
-          <div className="space-y-4">
-            <ProfileItem label="Full Name" value={`${personalInfo.firstName} ${personalInfo.lastName}`} />
-            <ProfileItem label="Gender" value={personalInfo.gender} />
-            <ProfileItem label="Date of Birth" value={personalInfo.dob} />
-            <ProfileItem label="Phone Number" value={personalInfo.contact} />
-            <ProfileItem label="Address" value={personalInfo.address} />
+            <div className="flex items-center justify-center h-56 text-slate-400 text-sm">
+              No medical records uploaded yet
+            </div>
           </div>
+
         </div>
 
-        {/* -------- Medical Information -------- */}
-        <div className="bg-white border rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
-            Medical Information
-          </h3>
+        {/* ================= RIGHT SIDEBAR ================= */}
+        <div className="space-y-6">
 
-          <div className="space-y-4">
-            <ProfileItem label="Blood Group" value={medicalInfo.bloodGroup} />
-            <ProfileItem label="Allergies" value={medicalInfo.allergies || "None"} />
-            <ProfileItem label="Medical Conditions" value={medicalInfo.conditions || "None"} />
-            <ProfileItem label="Medical History" value={medicalInfo.history || "None"} />
+          {/* Compact Profile Card */}
+          <div className="bg-gradient-to-br from-emerald-50 to-cyan-50 border border-emerald-100 rounded-2xl p-5 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-white flex items-center justify-center font-semibold">
+                {personalInfo.firstName?.[0]}
+                {personalInfo.lastName?.[0]}
+              </div>
+
+              <div className="flex-1">
+                <p className="font-semibold text-slate-900 leading-tight">
+                  {personalInfo.firstName} {personalInfo.lastName}
+                </p>
+                <p className="text-xs text-slate-600">{user.email}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">
+                Registered Patient
+              </span>
+
+              <button
+                onClick={() => navigate("/patientR")}
+                className="text-xs font-medium text-emerald-700 hover:underline"
+              >
+                Edit
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* ================= Bottom Section ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Personal Information */}
+          <SidebarCard title="Personal Information">
+            <InfoRow label="Full Name" value={`${personalInfo.firstName} ${personalInfo.lastName}`} />
+            <InfoRow label="Gender" value={personalInfo.gender} />
+            <InfoRow label="DOB" value={personalInfo.dob} />
+            <InfoRow label="Phone" value={personalInfo.contact} />
+            <InfoRow label="Address" value={personalInfo.address} />
+          </SidebarCard>
 
-        {/* Medical Records */}
-        <div className="lg:col-span-2 bg-white border rounded-2xl p-6">
-          <h3 className="font-semibold text-gray-800 mb-4">
-            Medical Records
-          </h3>
+          {/* Medical Information */}
+          <SidebarCard title="Medical Information">
+            <InfoRow label="Blood Group" value={medicalInfo.bloodGroup} />
+            <InfoRow label="Allergies" value={medicalInfo.allergies || "None"} />
+            <InfoRow label="Conditions" value={medicalInfo.conditions || "None"} />
+            <InfoRow label="History" value={medicalInfo.history || "None"} />
+          </SidebarCard>
 
-          <div className="text-center text-gray-400 py-12">
-            No medical records available
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white border rounded-2xl p-6">
-          <h3 className="font-semibold text-gray-800 mb-4">
-            Quick Actions
-          </h3>
-
-          <div className="space-y-3">
-            <Action text="View Appointments" onClick={() => navigate("/appointments")} />
-            <Action text="Edit Profile" onClick={() => navigate("/patientR")} />
-            <Action text="Go to Dashboard" onClick={() => navigate("/dashboard")} />
-          </div>
         </div>
       </div>
     </div>
   );
 }
 
-/* ================= Reusable Components ================= */
+/* ================= REUSABLE ================= */
 
-function ProfileItem({ label, value }) {
+function SidebarCard({ title, children }) {
   return (
-    <div className="flex justify-between border-b pb-2 last:border-b-0">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="text-sm font-medium text-gray-800 text-right max-w-[60%]">
+    <div className="bg-white border border-emerald-100 rounded-xl p-5 shadow-sm">
+      <h4 className="text-sm font-semibold text-slate-800 mb-4">
+        {title}
+      </h4>
+      <div className="space-y-3">{children}</div>
+    </div>
+  );
+}
+
+function InfoRow({ label, value }) {
+  return (
+    <div className="flex justify-between gap-4 text-sm border-b border-slate-100 pb-2 last:border-none">
+      <span className="text-slate-500">{label}</span>
+      <span className="text-slate-900 font-medium text-right max-w-[60%]">
         {value || "—"}
-      </p>
+      </span>
     </div>
-  );
-}
-
-function Action({ text, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full px-4 py-2 text-sm rounded-lg border bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
-    >
-      {text}
-    </button>
   );
 }
 

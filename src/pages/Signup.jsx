@@ -6,6 +6,8 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../utils/firebase";
 import { Activity, UserCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import BackToWelcome from "../components/BackToWelcome";
+
 
 function Signup() {
   const [email, setEmail] = useState('');
@@ -100,8 +102,9 @@ function Signup() {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
 
       <div className="relative z-10 w-full max-w-md">
+        <BackToWelcome className="absolute top-6 left-6" />
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -121,8 +124,9 @@ function Signup() {
           <p className="text-slate-600 text-lg">Join our healthcare platform</p>
         </motion.div>
 
+
         {/* Form */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -140,8 +144,8 @@ function Signup() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className={`px-4 py-3 rounded-xl text-sm font-medium ${message.type === 'error'
-                    ? 'bg-red-50 text-red-700 border-2 border-red-200'
-                    : 'bg-emerald-50 text-emerald-700 border-2 border-emerald-200'
+                  ? 'bg-red-50 text-red-700 border-2 border-red-200'
+                  : 'bg-emerald-50 text-emerald-700 border-2 border-emerald-200'
                   }`}
               >
                 {message.text}
