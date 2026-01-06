@@ -13,12 +13,17 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Appointments from "./pages/Appointments";
 import Notifications from "./pages/Notifications";
+import Prescribe from "./pages/Prescribe";
+import AllPrescribe from "./pages/AllPrescribe";
 
 /* Doctor */
 import DoctorSignup from "./pages/DoctorSignup";
 import DoctorForm from "./pages/DoctorForm";
 import DoctorWaiting from "./pages/DoctorWaiting";
 import DoctorDashboard from "./pages/DoctorDashboard";
+import DocInfo from "./pages/DocInfo";
+import Prescription from "./pages/Prescription";
+import DocAppointments from "./pages/DocAppointments";
 
 /* Admin */
 import AdminDashboard from "./pages/AdminDashboard";
@@ -29,6 +34,8 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfileGuard from "./components/ProfileGuard";
 import AdminRoute from "./components/AdminRoute";
+import DoctorDashboardLayout from "./layouts/DoctorDashboardLayout";
+import RoleBasedLayout from "./layouts/RoleBasedLayout";
 
 function App() {
   const location = useLocation();
@@ -82,10 +89,30 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/appointments" element={<Appointments />} />
             <Route path="/records" element={<div>Records</div>} />
-            <Route path="/prescription" element={<div>Prescription</div>} />
+            
             <Route path="/billing" element={<div>Billing</div>} />
+            <Route path="/doc-info/:doctorId" element={<DocInfo />} />
+
 
           </Route>
+
+          {/* <Route
+            path="/all-prescription"
+            element={
+              <ProtectedRoute>
+                <AllPrescribe />
+              </ProtectedRoute>
+            }
+          /> */}
+
+          <Route
+            path="/prescribe/:id"
+            element={
+              <ProtectedRoute>
+                <Prescribe />
+              </ProtectedRoute>
+            }
+          />
 
           {/* 👨‍⚕️ DOCTOR FLOW */}
           <Route
@@ -115,14 +142,19 @@ function App() {
             }
           />
 
+          {/* 👨‍⚕️ DOCTOR DASHBOARD + SIDEBAR */}
           <Route
-            path="/doctor-dashboard"
             element={
               <ProtectedRoute role="doctor">
-                <DoctorDashboard />
+                <DoctorDashboardLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+            <Route path="/doctor-appointments" element={<DocAppointments />} />
+            <Route path="/doctor/prescription/new" element={<Prescription />} />
+            <Route path="/profile" element={<DocInfo />} />
+          </Route>
 
           {/* 🛡️ ADMIN (ONLY ONE ROUTE, CORRECT) */}
           <Route
@@ -133,6 +165,13 @@ function App() {
               </AdminRoute>
             }
           />
+          <Route
+            element={
+              <ProtectedRoute role="doctor">
+                <DoctorDashboardLayout />
+              </ProtectedRoute>
+            }
+          ></Route>
 
           {/* ❓ FALLBACK */}
           <Route path="*" element={<Welcome />} />

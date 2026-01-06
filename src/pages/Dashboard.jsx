@@ -35,11 +35,10 @@ function Dashboard() {
       try {
         const ref = doc(db, "patients", user.uid);
         const snap = await getDoc(ref);
-
-        if (!snap.exists()) {
+        if (userData?.role === "patient" && !snap.exists()) {
           navigate("/patientR");
-          return;
         }
+
 
         const data = snap.data();
         setPatient(data);
@@ -207,6 +206,7 @@ function Dashboard() {
                 {doctors.map((doc) => (
                   <div
                     key={doc.id}
+                    onClick={() => navigate(`/doc-info/${doc.id}`)}
                     className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200"
                   >
                     <div className="w-11 h-11 flex items-center justify-center rounded-full bg-emerald-600 text-white font-bold">

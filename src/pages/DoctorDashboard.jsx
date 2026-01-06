@@ -16,7 +16,7 @@ export default function DoctorDashboard() {
   const [appointments, setAppointments] = useState([]);
   const doctorId = auth.currentUser?.uid;
 
-  /* 🔹 Fetch appointments for this doctor */
+  /* 🔹 Fetch appointments for this doctor (kept for future use) */
   useEffect(() => {
     if (!doctorId) return;
 
@@ -37,179 +37,28 @@ export default function DoctorDashboard() {
     return () => unsub();
   }, [doctorId]);
 
-  /* 🔹 APPROVE / REJECT / COMPLETE */
-  const updateAppointmentStatus = async (appointment, newStatus) => {
-    try {
-      const appointmentRef = doc(db, "appointments", appointment.id);
-      const patientRef = doc(db, "patients", appointment.patientId);
-
-      /* 1️⃣ Update appointment status */
-      await updateDoc(appointmentRef, {
-        status: newStatus,
-        updatedAt: serverTimestamp(),
-      });
-
-      /* 2️⃣ Update patient counters */
-      if (appointment.status === "requested") {
-        // moving OUT of pending
-        await updateDoc(patientRef, {
-          pendingAppointmentCount: increment(-1),
-        });
-      }
-
-      if (newStatus === "approved") {
-        await updateDoc(patientRef, {
-          appointmentCount: increment(1),
-        });
-      }
-
-      /* 3️⃣ Send notification */
-      let message = "";
-
-      if (newStatus === "approved") {
-        message = `Your appointment with Dr. ${appointment.doctorName} is approved on ${appointment.date}`;
-      }
-
-      if (newStatus === "rejected") {
-        message = `Your appointment with Dr. ${appointment.doctorName} on ${appointment.date} was rejected`;
-      }
-
-      if (newStatus === "completed") {
-        message = `Your appointment with Dr. ${appointment.doctorName} on ${appointment.date} is completed`;
-      }
-
-      if (message) {
-        await addDoc(collection(db, "notifications"), {
-          userId: appointment.patientId,
-          role: "patient",
-          title: "Appointment Update",
-          message,
-          appointmentId: appointment.id,
-          read: false,
-          createdAt: serverTimestamp(),
-        });
-      }
-
-    } catch (err) {
-      console.error("Failed to update appointment:", err);
-      alert("Failed to update appointment");
-    }
-  };
-
   return (
-    <div className="p-6 pt-16">
-      <h1 className="text-3xl font-bold mb-6">Doctor Dashboard</h1>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="text-center bg-white border border-slate-200 rounded-2xl shadow-lg px-10 py-14 max-w-xl w-full">
+        <div className="text-6xl mb-4">📊</div>
 
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 text-left">#</th>
-              <th className="p-3 text-left">Patient Name</th>
-              <th className="p-3 text-left">Mobile</th>
-              <th className="p-3 text-left">Requested At</th>
-              <th className="p-3 text-left">Date</th>
-              <th className="p-3 text-left">Reason</th>
-              <th className="p-3 text-center">Status</th>
-              <th className="p-3 text-center">Actions</th>
-            </tr>
-          </thead>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">
+          Doctor Analytics
+        </h1>
 
-          <tbody>
-            {appointments.length === 0 && (
-              <tr>
-                <td colSpan="8" className="p-4 text-center text-gray-500">
-                  No appointments found
-                </td>
-              </tr>
-            )}
+        <p className="text-slate-600 mb-6">
+          Powerful insights and visual analytics are on the way.
+        </p>
 
-            {appointments.map((a, index) => (
-              <tr key={a.id} className="border-t">
-                <td className="p-3">{index + 1}</td>
-                <td className="p-3">{a.patientName || "N/A"}</td>
-                <td className="p-3">{a.patientPhone || "-"}</td>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-sm font-semibold">
+          🚀 Coming Soon
+        </div>
 
-                <td className="p-3">
-                  {a.createdAt?.toDate
-                    ? a.createdAt.toDate().toLocaleString()
-                    : "-"}
-                </td>
-
-                <td className="p-3">{a.date}</td>
-                <td className="p-3">{a.appointmentType}</td>
-
-                <td className="p-3 text-center">
-                  <StatusBadge status={a.status} />
-                </td>
-
-                <td className="p-3 text-center space-x-2">
-                  {a.status === "requested" && (
-                    <>
-                      <button
-                        onClick={() =>
-                          updateAppointmentStatus(a, "approved")
-                        }
-                        className="px-3 py-1 bg-green-600 text-white rounded text-xs"
-                      >
-                        Approve
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          updateAppointmentStatus(a, "rejected")
-                        }
-                        className="px-3 py-1 bg-red-500 text-white rounded text-xs"
-                      >
-                        Reject
-                      </button>
-                    </>
-                  )}
-
-                  {a.status === "approved" && (
-                    <button
-                      onClick={() =>
-                        updateAppointmentStatus(a, "completed")
-                      }
-                      className="px-3 py-1 bg-blue-600 text-white rounded text-xs"
-                    >
-                      Mark Completed
-                    </button>
-                  )}
-
-                  {["rejected", "withdrawn", "completed"].includes(
-                    a.status
-                  ) && (
-                      <span className="text-xs text-gray-500 capitalize">
-                        {a.status}
-                      </span>
-                    )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <p className="mt-6 text-sm text-slate-400">
+          Appointment trends, patient statistics, and performance graphs
+          will appear here.
+        </p>
       </div>
     </div>
-  );
-}
-
-/* 🔹 STATUS BADGE */
-function StatusBadge({ status }) {
-  const styles = {
-    requested: "bg-yellow-100 text-yellow-700",
-    approved: "bg-green-100 text-green-700",
-    rejected: "bg-red-100 text-red-700",
-    completed: "bg-blue-100 text-blue-700",
-    withdrawn: "bg-gray-100 text-gray-600",
-  };
-
-  return (
-    <span
-      className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-600"
-        }`}
-    >
-      {status}
-    </span>
   );
 }

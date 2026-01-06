@@ -67,10 +67,11 @@ function Sidebar() {
             Records
           </NavLink>
 
-          <NavLink to="/prescription" className={linkClass}>
+          {/* <NavLink to="all-prescription" className={linkClass}>
             <PencilSquareIcon className="w-5 h-5" />
             Prescription
-          </NavLink>
+          </NavLink> */}
+          
 
           <NavLink to="/billing" className={linkClass}>
             <CreditCardIcon className="w-5 h-5" />

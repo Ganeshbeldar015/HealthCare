@@ -6,6 +6,8 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { Activity, LogIn } from "lucide-react";
 import { motion } from "framer-motion";
 import BackToWelcome from "../components/BackToWelcome";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../utils/firebase";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -29,8 +31,30 @@ function Login() {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const uid = cred.user.uid;
+
+      // 🔍 Check role from users collection
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        throw new Error("User role not found");
+      }
+
+      const { role } = userSnap.data();
+
+      // 🎯 Role-based redirect
+      if (role === "patient") {
+        navigate("/dashboard");
+      } else if (role === "doctor") {
+        navigate("/doctor-dashboard");
+      } else if (role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+
     } catch (error) {
       setMessage({
         text: error.message || "Login failed.",
@@ -40,6 +64,7 @@ function Login() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12 relative overflow-hidden">
