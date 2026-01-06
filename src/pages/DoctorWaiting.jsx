@@ -1,125 +1,93 @@
-import React, { useState } from "react";
-import { auth, db } from "../utils/firebase";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  CheckCircle2,
+  CalendarCheck,
+  FileText,
+  CreditCard,
+} from "lucide-react";
 
-function DoctorForm() {
-  const user = auth.currentUser;
+function DoctorWaiting() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    name: "",
-    phone: "",
-    aadhaar: "",
-    uid: "",
-    college: "",
-    passoutYear: "",
-    experience: "",
-    specialization: "",
-    homeAddress: "",
-    clinicAddress: "",
-  });
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex flex-col justify-between">
 
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+      {/* ===== SUCCESS CARD ===== */}
+      <div className="flex flex-1 items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-xl p-10 max-w-md w-full text-center">
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+          {/* ✅ LUCIDE ICON */}
+          <div className="flex justify-center mb-4">
+            <div className="bg-emerald-100 p-4 rounded-full">
+              <CheckCircle2
+                size={48}
+                className="text-emerald-600"
+                strokeWidth={2.5}
+              />
+            </div>
+          </div>
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      await setDoc(doc(db, "doctors", user.uid), {
-        ...form,
-        email: user.email,
-        role: "doctor",
-        status: "waiting",
-        createdAt: serverTimestamp(),
-      });
-
-      setSubmitted(true);
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-white p-8 rounded-xl shadow-md text-center max-w-md">
-          <h2 className="text-2xl font-bold text-purple-600 mb-3">
-            Registration Submitted 🎉
+          <h2 className="text-2xl font-bold text-emerald-700">
+            Registration Submitted
           </h2>
-          <p className="text-gray-600">
+
+          <p className="text-gray-600 mt-3">
             Your doctor profile is under admin verification.
             <br />
-            You’ll be able to access your dashboard once approved.
+            You will be able to access your dashboard once approved.
           </p>
+
           <button
             onClick={() => navigate("/login")}
-            className="mt-6 px-6 py-3 bg-purple-600 text-white rounded-lg"
+            className="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold transition"
           >
             Go to Login
           </button>
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow p-8">
-        <h2 className="text-2xl font-bold mb-6">Doctor Registration</h2>
+      {/* ===== FEATURES SECTION ===== */}
+      <div className="bg-white py-12">
+        <h3 className="text-center text-2xl font-bold text-emerald-800 mb-8">
+          What you can do after approval
+        </h3>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          <input name="name" placeholder="Full Name" onChange={handleChange} required />
-          <input value={user?.email} disabled className="bg-gray-100" />
-
-          <input name="phone" placeholder="Mobile Number" onChange={handleChange} required />
-          <input name="aadhaar" placeholder="Aadhaar Number" onChange={handleChange} required />
-
-          <input name="uid" placeholder="Medical UID / Registration ID" onChange={handleChange} required />
-          <input name="specialization" placeholder="Specialization" onChange={handleChange} required />
-
-          <input name="college" placeholder="College Name" onChange={handleChange} required />
-          <input name="passoutYear" placeholder="Year of Passout" onChange={handleChange} required />
-
-          <input name="experience" placeholder="Years of Experience" onChange={handleChange} required />
-
-          <textarea
-            name="homeAddress"
-            placeholder="Home Address"
-            onChange={handleChange}
-            className="md:col-span-2"
-            required
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
+          <Feature
+            icon={<CalendarCheck size={30} />}
+            title="Appointments"
+            desc="Approve, reschedule and manage patient appointments easily."
           />
 
-          <textarea
-            name="clinicAddress"
-            placeholder="Clinic / Hospital Address"
-            onChange={handleChange}
-            className="md:col-span-2"
-            required
+          <Feature
+            icon={<FileText size={30} />}
+            title="Prescriptions"
+            desc="Create digital prescriptions and share them with patients."
           />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="md:col-span-2 bg-purple-600 text-white py-3 rounded-lg font-semibold"
-          >
-            {loading ? "Submitting..." : "Submit for Verification"}
-          </button>
-        </form>
+          <Feature
+            icon={<CreditCard size={30} />}
+            title="Billing"
+            desc="Generate bills, manage payments and treatment charges."
+          />
+        </div>
       </div>
     </div>
   );
 }
 
-export default DoctorForm;
+/* ===== FEATURE CARD ===== */
+function Feature({ icon, title, desc }) {
+  return (
+    <div className="bg-green-50 border border-green-100 rounded-xl p-6 text-center hover:shadow-lg transition">
+      <div className="flex justify-center text-emerald-600 mb-3">
+        {icon}
+      </div>
+      <h4 className="font-bold text-lg text-emerald-800">{title}</h4>
+      <p className="text-gray-600 text-sm mt-2">{desc}</p>
+    </div>
+  );
+}
+
+export default DoctorWaiting;
