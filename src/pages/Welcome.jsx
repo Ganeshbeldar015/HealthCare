@@ -387,10 +387,10 @@ const App = () => {
       <section className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
-            Built for Patients, Doctors & Admins
+            Built for Patients and Doctors 
           </h2>
           <p className="text-lg md:text-xl text-slate-600 leading-relaxed">
-            Patients manage care, doctors handle appointments, and admins maintain quality — all from one secure platform.
+            Patients manage care, doctors handle appointments and  maintain quality — all from one secure platform.
           </p>
         </div>
       </section>

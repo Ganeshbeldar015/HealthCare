@@ -22,14 +22,14 @@ function Sidebar() {
     <aside className="w-64 min-h-screen bg-white/70 backdrop-blur-xl border-r border-slate-200 px-4 py-6">
 
       {/* BRAND */}
-      <div className="mb-10 px-2">
+      {/* <div className="mb-10 px-2">
         <h1 className="text-xl font-black text-emerald-700 tracking-tight">
           🏥 HealthCare
         </h1>
         <p className="text-xs text-slate-500 mt-1">
           Smart Management Platform
         </p>
-      </div>
+      </div> */}
 
       {/* MENU */}
       <div className="mb-8">

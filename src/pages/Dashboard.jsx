@@ -12,6 +12,7 @@ import {
 import { db } from "../utils/firebase";
 import { useAuth } from "../utils/useAuth";
 import { useNavigate } from "react-router-dom";
+import { Calendar, Clock } from "lucide-react";
 
 function Dashboard() {
   const { user } = useAuth();
@@ -130,13 +131,13 @@ function Dashboard() {
         <StatCard
           label="Total Appointments"
           value={stats.totalAppointments}
-          icon="📅"
+          icon={<Calendar className="w-8 h-8" />}
           bg="from-emerald-50 to-cyan-50"
         />
         <StatCard
           label="Pending Appointments"
           value={stats.pendingAppointments}
-          icon="⏳"
+          icon={<Clock className="w-8 h-8" />}
           bg="from-yellow-50 to-orange-50"
         />
       </div>
@@ -251,7 +252,7 @@ function StatCard({ label, value, icon, bg }) {
             {value}
           </h2>
         </div>
-        <div className="text-3xl">{icon}</div>
+        <div className="text-slate-600">{icon}</div>
       </div>
     </div>
   );
