@@ -16,6 +16,8 @@ import Notifications from "./pages/Notifications";
 import PrescribeInfo from "./pages/PrescribeInfo";
 import AllPrescribePat from "./pages/AllPrescribePat";
 
+import Billing from "./pages/Billing";
+
 
 /* Doctor */
 import DoctorSignup from "./pages/DoctorSignup";
@@ -26,6 +28,8 @@ import DocInfo from "./pages/DocInfo";
 import Prescription from "./pages/Prescription";
 import DocAppointments from "./pages/DocAppointments";
 import AllPrescribeDoc from "./pages/AllPrescribeDoc";
+import CreateBilling from "./pages/CreateBilling";
+import DocBilling from "./pages/DocBilling";
 
 /* Admin */
 import AdminDashboard from "./pages/AdminDashboard";
@@ -92,7 +96,7 @@ function App() {
             <Route path="/appointments" element={<Appointments />} />
             <Route path="/records" element={<div>Records</div>} />
 
-            <Route path="/billing" element={<div>Billing</div>} />
+            
             <Route path="/doc-info/:doctorId" element={<DocInfo />} />
 
 
@@ -101,6 +105,9 @@ function App() {
           <Route path="/patient/prescriptions" element={<AllPrescribePat />} />
           <Route path="/doctor/prescriptions" element={<AllPrescribeDoc />} />
           <Route path="/PrescribeInfo/:id" element={<PrescribeInfo />} />
+          <Route path="/create-billing" element={<CreateBilling />} />
+          <Route path="/display-billing" element={<Billing />} />
+          <Route path="/doc-billing" element={<DocBilling />} />
 
 
 

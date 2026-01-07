@@ -13,6 +13,8 @@ function DoctorSidebar() {
     { to: "/doctor/prescription/new", label: "Prescriptions", icon: ClipboardDocumentIcon },
     { to: "/notifications", label: "Notifications", icon: BellIcon },
     { to: "/doctor/prescriptions", label: "Past Prescriptions", icon: ClipboardDocumentIcon },
+    { to: "/create-billing", label: "Generate Billing", icon: ClipboardDocumentIcon },
+    { to: "/doc-billing", label: "View Billing", icon: ClipboardDocumentIcon },
 
   ];
 
