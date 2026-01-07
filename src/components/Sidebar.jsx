@@ -65,7 +65,7 @@ function Sidebar() {
 
 
 
-          <NavLink to="/billing" className={linkClass}>
+          <NavLink to="/display-billing" className={linkClass}>
             <CreditCardIcon className="w-5 h-5" />
             Billing
           </NavLink>

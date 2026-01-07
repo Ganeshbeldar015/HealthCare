@@ -11,7 +11,7 @@
     "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.52.0",
     "firebase": "^12.7.0",
-    "framer-motion": "^12.24.5",
+    "framer-motion": "^12.24.10",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
