@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { Calendar, Clock } from "lucide-react";
 
 function Dashboard() {
-  const { user } = useAuth();
+  const { user , userData} = useAuth();
   const navigate = useNavigate();
 
   const [patient, setPatient] = useState(null);

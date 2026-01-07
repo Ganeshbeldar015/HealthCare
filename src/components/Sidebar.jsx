@@ -12,24 +12,15 @@ import {
 function Sidebar() {
   const linkClass = ({ isActive }) =>
     `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all
-    ${
-      isActive
-        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200"
-        : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+    ${isActive
+      ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200"
+      : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
     }`;
 
   return (
     <aside className="w-64 min-h-screen bg-white/70 backdrop-blur-xl border-r border-slate-200 px-4 py-6">
 
-      {/* BRAND */}
-      {/* <div className="mb-10 px-2">
-        <h1 className="text-xl font-black text-emerald-700 tracking-tight">
-          🏥 HealthCare
-        </h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Smart Management Platform
-        </p>
-      </div> */}
+
 
       {/* MENU */}
       <div className="mb-8">
@@ -67,11 +58,12 @@ function Sidebar() {
             Records
           </NavLink>
 
-          {/* <NavLink to="all-prescription" className={linkClass}>
-            <PencilSquareIcon className="w-5 h-5" />
-            Prescription
-          </NavLink> */}
-          
+          <NavLink to="/patient/prescriptions" className={linkClass}>
+            <ClipboardDocumentListIcon className="w-5 h-5" />
+            Prescriptions
+          </NavLink>
+
+
 
           <NavLink to="/billing" className={linkClass}>
             <CreditCardIcon className="w-5 h-5" />

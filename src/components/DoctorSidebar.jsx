@@ -12,8 +12,8 @@ function DoctorSidebar() {
     { to: "/doctor-appointments", label: "Appointments", icon: CalendarDaysIcon },
     { to: "/doctor/prescription/new", label: "Prescriptions", icon: ClipboardDocumentIcon },
     { to: "/notifications", label: "Notifications", icon: BellIcon },
-    // { to: "/all-prescription", label: "Past Prescribes", icon: ClipboardDocumentIcon},
-    
+    { to: "/doctor/prescriptions", label: "Past Prescriptions", icon: ClipboardDocumentIcon },
+
   ];
 
   return (
@@ -29,10 +29,9 @@ function DoctorSidebar() {
             to={to}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium
-              ${
-                isActive
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "text-slate-600 hover:bg-slate-100"
+              ${isActive
+                ? "bg-emerald-100 text-emerald-700"
+                : "text-slate-600 hover:bg-slate-100"
               }`
             }
           >

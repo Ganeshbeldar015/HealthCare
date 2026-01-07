@@ -4,7 +4,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../utils/firebase";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
-export default function Prescribe() {
+export default function PrescribeInfo() {
   const { id } = useParams(); // prescriptionId
   const navigate = useNavigate();
 
@@ -46,7 +46,7 @@ export default function Prescribe() {
   if (!prescription) return null;
 
   return (
-    <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-8">
+    <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-8 pt-16">
       {/* 🔙 Header */}
       <div className="flex items-center gap-3 mb-6">
         <button

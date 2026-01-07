@@ -14,7 +14,7 @@ function DoctorForm() {
     name: "",
     phone: "",
     aadhaar: "",
-    uid: "",
+    collegeUid: "",          // ✅ RENAMED
     college: "",
     passoutYear: "",
     experience: "",
@@ -37,18 +37,40 @@ function DoctorForm() {
       return;
     }
 
+    if (!user) {
+      alert("User not authenticated");
+      return;
+    }
+
     setLoading(true);
 
     try {
       await setDoc(doc(db, "doctors", user.uid), {
-        ...form,
+        /* 🔐 AUTH IDENTITY */
+        authUid: user.uid,
+
+        /* 🏫 REGISTRATION NUMBER */
+        collegeUid: form.collegeUid,
+
+        /* 📋 FORM DATA */
+        name: form.name,
+        phone: form.phone,
+        aadhaar: form.aadhaar,
+        specialization: form.specialization,
+        college: form.college,
+        passoutYear: form.passoutYear,
+        experience: form.experience,
+        homeAddress: form.homeAddress,
+        clinicAddress: form.clinicAddress,
+
+        /* SYSTEM */
         email: user.email,
         role: "doctor",
         status: "waiting",
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
 
-      // ✅ Redirect to waiting page
       navigate("/doctor-waiting");
     } catch (error) {
       console.error(error);
@@ -69,26 +91,13 @@ function DoctorForm() {
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          {/* Full Name */}
-          <Input
-            label="Full Name"
-            name="name"
-            onChange={handleChange}
-            required
-          />
+          <Input label="Full Name" name="name" onChange={handleChange} required />
 
-          {/* Email */}
-          <Input
-            label="Email Address"
-            value={user?.email}
-            disabled
-          />
+          <Input label="Email Address" value={user?.email} disabled />
 
-          {/* Mobile */}
           <Input
             label="Mobile Number"
             name="phone"
-            placeholder="10-digit mobile number"
             maxLength={10}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, "");
@@ -99,11 +108,9 @@ function DoctorForm() {
             required
           />
 
-          {/* Aadhaar */}
           <Input
             label="Aadhaar Number"
             name="aadhaar"
-            placeholder="12-digit Aadhaar"
             maxLength={12}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, "");
@@ -114,15 +121,14 @@ function DoctorForm() {
             required
           />
 
-          {/* UID */}
+          {/* 🔥 RENAMED FIELD */}
           <Input
-            label="Medical UID / Registration ID"
-            name="uid"
+            label="Medical Registration / College UID"
+            name="collegeUid"
             onChange={handleChange}
             required
           />
 
-          {/* Specialization */}
           <Input
             label="Specialization"
             name="specialization"
@@ -130,7 +136,6 @@ function DoctorForm() {
             required
           />
 
-          {/* College */}
           <Input
             label="College Name with Address"
             name="college"
@@ -138,12 +143,10 @@ function DoctorForm() {
             required
           />
 
-          {/* Passout Year */}
           <Input
             label="Year of Passout"
             name="passoutYear"
             maxLength={4}
-            placeholder="YYYY"
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, "");
               if (value.length <= 4) {
@@ -153,7 +156,6 @@ function DoctorForm() {
             required
           />
 
-          {/* Experience */}
           <Input
             label="Years of Experience"
             name="experience"
@@ -164,54 +166,26 @@ function DoctorForm() {
             required
           />
 
-          {/* Home Address */}
-          <Textarea
-            label="Home Address"
-            name="homeAddress"
-            onChange={handleChange}
-            required
-          />
+          <Textarea label="Home Address" name="homeAddress" onChange={handleChange} required />
+          <Textarea label="Clinic / Hospital Address" name="clinicAddress" onChange={handleChange} required />
 
-          {/* Clinic Address */}
-          <Textarea
-            label="Clinic / Hospital Address"
-            name="clinicAddress"
-            onChange={handleChange}
-            required
-          />
-
-          {/* Declaration */}
           <Checkbox
             checked={acceptDeclaration}
             onChange={setAcceptDeclaration}
-            text="I declare that all information provided is true and accurate."
+            text="I declare that all information provided is true."
           />
 
-          {/* Privacy */}
           <Checkbox
             checked={acceptPrivacy}
             onChange={setAcceptPrivacy}
-            text={
-              <>
-                I agree to the{" "}
-                <span className="text-purple-600 underline cursor-pointer">
-                  Privacy Policy
-                </span>{" "}
-                and{" "}
-                <span className="text-purple-600 underline cursor-pointer">
-                  Terms & Conditions
-                </span>.
-              </>
-            }
+            text="I agree to Privacy Policy and Terms & Conditions."
           />
 
           <button
             type="submit"
             disabled={loading || !acceptDeclaration || !acceptPrivacy}
-            className={`md:col-span-2 py-3 rounded-lg font-semibold transition ${
-              loading || !acceptDeclaration || !acceptPrivacy
-                ? "bg-gray-300 cursor-not-allowed"
-                : "bg-purple-600 hover:bg-purple-700 text-white"
+            className={`md:col-span-2 py-3 rounded-lg font-semibold ${
+              loading ? "bg-gray-300" : "bg-purple-600 text-white"
             }`}
           >
             {loading ? "Submitting..." : "Submit for Verification"}
@@ -227,13 +201,8 @@ function DoctorForm() {
 function Input({ label, ...props }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-1">
-        {label}
-      </label>
-      <input
-        {...props}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-      />
+      <label className="block text-sm font-semibold mb-1">{label}</label>
+      <input {...props} className="w-full px-4 py-3 border rounded-lg" />
     </div>
   );
 }
@@ -241,28 +210,17 @@ function Input({ label, ...props }) {
 function Textarea({ label, ...props }) {
   return (
     <div className="md:col-span-2">
-      <label className="block text-sm font-semibold text-gray-700 mb-1">
-        {label}
-      </label>
-      <textarea
-        rows="3"
-        {...props}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-      />
+      <label className="block text-sm font-semibold mb-1">{label}</label>
+      <textarea {...props} rows="3" className="w-full px-4 py-3 border rounded-lg" />
     </div>
   );
 }
 
 function Checkbox({ checked, onChange, text }) {
   return (
-    <div className="md:col-span-2 flex items-start gap-3">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="mt-1 h-4 w-4 text-purple-600 border-gray-300 rounded"
-      />
-      <label className="text-sm text-gray-700">{text}</label>
+    <div className="md:col-span-2 flex gap-3">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <label className="text-sm">{text}</label>
     </div>
   );
 }
