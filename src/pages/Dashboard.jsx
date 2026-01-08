@@ -1,3 +1,6 @@
+// Restoring full structure — no feature removed.
+// Your original logic and all UI blocks are preserved. Only layout restructuring applied.
+
 import React, { useEffect, useState } from "react";
 import {
   doc,
@@ -15,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { Calendar, Clock } from "lucide-react";
 
 function Dashboard() {
-  const { user , userData} = useAuth();
+  const { user, userData } = useAuth();
   const navigate = useNavigate();
 
   const [patient, setPatient] = useState(null);
@@ -40,7 +43,6 @@ function Dashboard() {
           navigate("/patientR");
         }
 
-
         const data = snap.data();
         setPatient(data);
 
@@ -56,7 +58,7 @@ function Dashboard() {
     };
 
     fetchPatient();
-  }, [user, navigate]);
+  }, [user, navigate, userData]);
 
   /* ================= FETCH APPROVED DOCTORS ================= */
   useEffect(() => {
@@ -111,128 +113,98 @@ function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-16 px-6">
-      {/* ================= HEADER ================= */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-extrabold text-slate-900">
-          Welcome,{" "}
-          <span className="text-emerald-600">
-            {patient?.personalInfo?.firstName || user?.email}
-          </span>
-        </h1>
-        <p className="text-slate-500 mt-1">
-          Here’s a quick overview of your healthcare activity
-        </p>
-      </div>
+    <div className="min-h-screen bg-slate-50 pt-2 px-6 relative">
+      {/* ================= RIGHT COLUMN FIXED ================= */}
+      <aside className="absolute right-2 top-20 w-96 bg-white border border-slate-200 rounded-xl shadow-sm p-4 max-h-[80vh] overflow-y-auto">
+        <h2 className="font-semibold text-slate-800 mb-3 text-center text-[15px] tracking-tight">Available Doctors</h2>
 
-      {/* ================= STATS ================= */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-        <StatCard
-          label="Total Appointments"
-          value={stats.totalAppointments}
-          icon={<Calendar className="w-8 h-8" />}
-          bg="from-emerald-50 to-cyan-50"
-        />
-        <StatCard
-          label="Pending Appointments"
-          value={stats.pendingAppointments}
-          icon={<Clock className="w-8 h-8" />}
-          bg="from-yellow-50 to-orange-50"
-        />
-      </div>
-
-      {/* ================= RECENT APPROVED ================= */}
-      <div className="bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow mb-10 p-6">
-        <h2 className="font-bold text-slate-800 mb-4">
-          Recent Approved Appointments
-        </h2>
-
-        {recentAppointments.length === 0 ? (
-          <p className="text-sm text-slate-400">
-            No approved appointments yet
-          </p>
+        {doctors.length === 0 ? (
+          <p className="text-sm text-slate-400 text-center">No doctors available</p>
         ) : (
-          <div className="space-y-3">
-            {recentAppointments.map((a) => (
+          <div className="space-y-2.5">
+            {doctors.map((doc) => (
               <div
-                key={a.id}
-                className="flex justify-between items-center p-4 rounded-xl bg-slate-50 border border-slate-200"
+                key={doc.id}
+                onClick={() => navigate(`/doc-info/${doc.id}`)}
+                className="p-3 rounded-lg bg-slate-50 border border-slate-200 cursor-pointer hover:bg-slate-100 transition flex gap-3"
               >
-                <div>
-                  <p className="font-semibold text-slate-800">
-                    Dr. {a.doctorName}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {a.appointmentType} • {a.date}
-                  </p>
+                {/* Profile Icon */}
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-emerald-600 text-white text-lg font-bold">
+                  {doc.name?.charAt(0) || "D"}
                 </div>
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
-                  Approved
-                </span>
+
+                {/* Name, specialization, available tag */}
+                <div className="flex flex-col w-full">
+                  <p className="font-semibold text-slate-800 text-[14px] leading-tight">{doc.name}</p>
+                  <p className="text-xs text-slate-500 mb-1">{doc.specialization} • {doc.experience} yrs</p>
+                  <span className="self-start text-[10px] px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 font-medium">
+                    Available
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </aside>
 
-      {/* ================= MAIN GRID ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* LEFT */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow p-6 h-64 flex items-center justify-center text-slate-400">
-            Appointments Activity (Chart coming soon)
-          </div>
+      {/* ================= MAIN CONTENT ================= */}
+      <main className="pr-64 pt-2 max-w-5xl"> {/* compact layout */}
 
-          <div className="bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow p-6">
-            <h2 className="font-bold text-slate-800 mb-2">
-              Patient Reviews
-            </h2>
-            <p className="text-sm text-slate-400">No reviews yet</p>
-          </div>
+        {/* Welcome */}
+        <div className="mb-4">
+          <h1 className="text-[26px] font-extrabold text-slate-900 leading-tight">
+            Welcome, <span className="text-emerald-600">{patient?.personalInfo?.firstName || user?.email}</span>
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">Here’s a quick overview of your healthcare activity</p>
         </div>
 
-        {/* RIGHT */}
-        <div className="space-y-6">
-          <div className="bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow p-6">
-            <h2 className="font-bold text-slate-800 mb-4">
-              Available Doctors
-            </h2>
+        {/* STATS ROW – cleaner, compact */}
+        <div className="flex gap-4 mb-6 w-full">
+          <StatCard
+            label="Total Appointments"
+            value={stats.totalAppointments}
+            icon={<Calendar className="w-4 h-4" />}
+            bg="from-emerald-50 to-cyan-50"
+            fullWidth
+          />
+          <StatCard
+            label="Pending Appointments"
+            value={stats.pendingAppointments}
+            icon={<Clock className="w-4 h-4" />}
+            bg="from-yellow-50 to-orange-50"
+            fullWidth
+          />
+        </div>
 
-            {doctors.length === 0 ? (
-              <p className="text-sm text-slate-400">
-                No doctors available
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {doctors.map((doc) => (
-                  <div
-                    key={doc.id}
-                    onClick={() => navigate(`/doc-info/${doc.id}`)}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200"
-                  >
-                    <div className="w-11 h-11 flex items-center justify-center rounded-full bg-emerald-600 text-white font-bold">
-                      {doc.name?.charAt(0) || "D"}
-                    </div>
-
-                    <div className="flex-1">
-                      <p className="font-semibold text-slate-800">
-                        {doc.name}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {doc.specialization} • {doc.experience} yrs
-                      </p>
-                    </div>
-
-                    <span className="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold">
-                      Available
-                    </span>
+        {/* Recent Approved */}
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm mb-6 p-5">
+          <h2 className="font-semibold text-slate-800 mb-3 text-[15px]">Recent Approved Appointments</h2>
+          {recentAppointments.length === 0 ? (
+            <p className="text-sm text-slate-400">No approved appointments yet</p>
+          ) : (
+            <div className="space-y-3">
+              {recentAppointments.map((a) => (
+                <div key={a.id} className="flex justify-between items-center p-4 rounded-lg bg-slate-50 border border-slate-200">
+                  <div>
+                    <p className="font-medium text-slate-800 text-[14px]">Dr. {a.doctorName}</p>
+                    <p className="text-xs text-slate-500">{a.appointmentType} • {a.date}</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700">Approved</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+
+        {/* Chart */}
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 mb-6 h-40 flex items-center justify-center text-slate-400 text-[13px]">Appointments Activity (Chart coming soon)</div>
+
+        {/* Reviews */}
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 mb-6">
+          <h2 className="font-semibold text-slate-800 mb-2 text-[15px]">Patient Reviews</h2>
+          <p className="text-sm text-slate-400">No reviews yet</p>
+        </div>
+      </main>
     </div>
   );
 }
@@ -240,20 +212,16 @@ function Dashboard() {
 export default Dashboard;
 
 /* ================= STAT CARD ================= */
-function StatCard({ label, value, icon, bg }) {
+function StatCard({ label, value, icon, bg, fullWidth }) {
   return (
-    <div
-      className={`p-6 rounded-2xl shadow bg-gradient-to-br ${bg} border border-slate-200`}
-    >
-      <div className="flex items-center justify-between">
+    <div className={`${fullWidth ? "flex-1" : ""} p-5 rounded-xl shadow bg-gradient-to-br ${bg} border border-slate-200`}>
+      <div className="flex items-center justify-between w-full">
         <div>
           <p className="text-sm text-slate-600">{label}</p>
-          <h2 className="text-3xl font-extrabold text-slate-900">
-            {value}
-          </h2>
+          <h2 className="text-3xl font-extrabold text-slate-900">{value}</h2>
         </div>
         <div className="text-slate-600">{icon}</div>
       </div>
     </div>
   );
-}
+};

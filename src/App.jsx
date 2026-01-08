@@ -56,6 +56,7 @@ function App() {
   ];
 
   const hideTopPanel = hideTopPanelRoutes.includes(location.pathname);
+  
 
   return (
     <div className="min-h-screen bg-gray-50">
