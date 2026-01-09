@@ -396,7 +396,7 @@ const App = () => {
       </section>
 
       <footer className="py-12 border-t border-slate-200 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">
-        <p>© 2024 VitalsFlow • Encrypted Healthcare Core • HIPAA Certified</p>
+        <p>© 2026 • Encrypted Healthcare Core </p>
       </footer>
     </div>
   );
