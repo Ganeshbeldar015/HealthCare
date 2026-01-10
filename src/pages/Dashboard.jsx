@@ -226,7 +226,16 @@ function Dashboard() {
     <div className="min-h-screen bg-slate-50 pt-2 px-6 relative">
 
       {/* SIDE DOCTORS LIST */}
-      <aside className="absolute right-2 top-20 w-96 bg-white border border-slate-200 rounded-xl shadow-sm p-4 max-h-[80vh] overflow-y-auto">
+      <aside
+        className="
+    bg-white border border-slate-200 rounded-xl shadow-sm p-4 max-h-[80vh] overflow-y-auto
+
+    lg:absolute lg:right-2 lg:top-20 lg:w-96  /* Desktop */
+
+    w-full mt-4 lg:mt-0                  /* Mobile below main content */
+  "
+      >
+
         <div className="flex justify-between items-center mb-3">
           <h2 className="font-semibold text-slate-800 text-[15px] tracking-tight">
             Available Doctors
@@ -275,7 +284,10 @@ function Dashboard() {
 
 
       {/* MAIN CONTENT */}
-      <main className="pr-64 pt-2 max-w-5xl">
+      <main className="pt-2 max-w-5xl
+    lg:pr-64   /* right padding only for large screens */
+    w-full
+">
 
         {/* WELCOME */}
         <div className="mb-4">
@@ -287,7 +299,7 @@ function Dashboard() {
 
 
         {/* STATS */}
-        <div className="flex gap-4 mb-6 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 w-full">
           <StatCard
             label="Total Appointments"
             value={stats.totalAppointments}
@@ -313,7 +325,8 @@ function Dashboard() {
           {recentAppointments.length === 0 ? (
             <p className="text-sm text-slate-400">No approved appointments yet</p>
           ) : (
-            <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+
               {recentAppointments.map((a) => (
                 <div key={a.id} className="flex justify-between items-center p-4 rounded-lg bg-slate-50 border border-slate-200">
                   <div>
@@ -360,7 +373,7 @@ function Dashboard() {
           {/* Chart Placeholder */}
           {chartData && (
             <>
-              <div className="my-4">
+              <div className="my-4 w-full overflow-x-auto">
                 <h3 className="text-[14px] font-semibold mb-2">Most Used Medicines</h3>
                 <BarChartComponent data={chartData.medicineCount} />
               </div>
