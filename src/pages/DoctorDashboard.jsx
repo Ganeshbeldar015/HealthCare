@@ -1,64 +1,87 @@
-import React, { useEffect, useState } from "react";
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  updateDoc,
-  doc,
-  addDoc,
-  increment,
-  serverTimestamp,
-} from "firebase/firestore";
-import { auth, db } from "../utils/firebase";
+import React from "react";
+import BarChartComponent from "../components/BarChartComponent";
+import PieChartComponent from "../components/PieChartComponent";
 
 export default function DoctorDashboard() {
-  const [appointments, setAppointments] = useState([]);
-  const doctorId = auth.currentUser?.uid;
 
-  /* 🔹 Fetch appointments for this doctor (kept for future use) */
-  useEffect(() => {
-    if (!doctorId) return;
+  /* 🔹 Static Prototype Data (Hackathon-ready) */
+  const summaryStats = {
+    totalAppointments: 42,
+    completed: 31,
+    pending: 11,
+    uniquePatients: 28,
+  };
 
-    const q = query(
-      collection(db, "appointments"),
-      where("doctorId", "==", doctorId)
-    );
+  const appointmentTrend = [
+    { day: "Mon", count: 5 },
+    { day: "Tue", count: 7 },
+    { day: "Wed", count: 6 },
+    { day: "Thu", count: 9 },
+    { day: "Fri", count: 8 },
+    { day: "Sat", count: 5 },
+    { day: "Sun", count: 2 },
+  ];
 
-    const unsub = onSnapshot(q, (snap) => {
-      setAppointments(
-        snap.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        }))
-      );
-    });
+  const ageData = {
+    "0-18": 5,
+    "19-30": 10,
+    "31-50": 8,
+    "50+": 7,
+  };
 
-    return () => unsub();
-  }, [doctorId]);
+  const statusRatio = {
+    Completed: 31,
+    Pending: 11,
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="text-center bg-white border border-slate-200 rounded-2xl shadow-lg px-10 py-14 max-w-xl w-full">
-        <div className="text-6xl mb-4">📊</div>
+    <div className="min-h-screen bg-slate-50 py-10 px-6">
 
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">
-          Doctor Analytics
-        </h1>
+      <h1 className="text-3xl font-bold text-slate-800 text-center mb-10">
+        Doctor Analytics Dashboard
+      </h1>
 
-        <p className="text-slate-600 mb-6">
-          Powerful insights and visual analytics are on the way.
-        </p>
-
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-sm font-semibold">
-          🚀 Coming Soon
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-5 max-w-6xl mx-auto">
+        <div className="p-5 bg-white shadow rounded-xl text-center border">
+          <p className="text-xs text-slate-500">Total Appointments</p>
+          <h2 className="text-2xl font-bold text-slate-800">{summaryStats.totalAppointments}</h2>
         </div>
 
-        <p className="mt-6 text-sm text-slate-400">
-          Appointment trends, patient statistics, and performance graphs
-          will appear here.
-        </p>
+        <div className="p-5 bg-white shadow rounded-xl text-center border">
+          <p className="text-xs text-slate-500">Completed</p>
+          <h2 className="text-2xl font-bold text-emerald-600">{summaryStats.completed}</h2>
+        </div>
+
+        <div className="p-5 bg-white shadow rounded-xl text-center border">
+          <p className="text-xs text-slate-500">Pending</p>
+          <h2 className="text-2xl font-bold text-amber-600">{summaryStats.pending}</h2>
+        </div>
+
+        <div className="p-5 bg-white shadow rounded-xl text-center border">
+          <p className="text-xs text-slate-500">Unique Patients</p>
+          <h2 className="text-2xl font-bold text-indigo-600">{summaryStats.uniquePatients}</h2>
+        </div>
       </div>
+
+      {/* Charts Section */}
+      <div className="max-w-6xl mx-auto mt-10 grid grid-cols-1 md:grid-cols-2 gap-10">
+
+        {/* Appointment Status Pie Chart */}
+        <div className="bg-white p-6 rounded-2xl shadow border">
+          <h3 className="text-md font-semibold text-slate-700 mb-4">Appointment Status</h3>
+          <PieChartComponent data={statusRatio} />
+        </div>
+
+        {/* Patient Age Distribution */}
+        <div className="bg-white p-6 rounded-2xl shadow border">
+          <h3 className="text-md font-semibold text-slate-700 mb-4">Patient Age Distribution</h3>
+          <BarChartComponent data={ageData} />
+        </div>
+      </div>
+
+     
+
     </div>
   );
 }

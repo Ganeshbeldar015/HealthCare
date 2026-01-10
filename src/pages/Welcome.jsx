@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Activity, 
-  ShieldCheck, 
-  Calendar, 
-  FileText, 
-  CreditCard, 
-  LayoutDashboard, 
-  Users, 
-  Stethoscope, 
+import {
+  Activity,
+  ShieldCheck,
+  Calendar,
+  FileText,
+  CreditCard,
+  LayoutDashboard,
+  Users,
+  Stethoscope,
   UserCircle,
   Menu,
   X,
@@ -20,35 +20,35 @@ import { motion } from "framer-motion";
 
 /* 🧠 Data Constants */
 const features = [
-  { 
-    icon: <ClipboardList size={24} />, 
-    title: "Patient Registration", 
-    desc: "Secure digital onboarding with medical history." 
+  {
+    icon: <ClipboardList size={24} />,
+    title: "Patient Registration",
+    desc: "Secure digital onboarding with medical history."
   },
-  { 
-    icon: <LayoutDashboard size={24} />, 
-    title: "Smart Dashboards", 
-    desc: "Role-based dashboards for patients, doctors & admins." 
+  {
+    icon: <LayoutDashboard size={24} />,
+    title: "Smart Dashboards",
+    desc: "Role-based dashboards for patients, doctors & admins."
   },
-  { 
-    icon: <Calendar size={24} />, 
-    title: "Appointment Requests", 
-    desc: "Request, approve, and manage appointments seamlessly." 
+  {
+    icon: <Calendar size={24} />,
+    title: "Appointment Requests",
+    desc: "Request, approve, and manage appointments seamlessly."
   },
-  { 
-    icon: <Pill size={24} />, 
-    title: "Digital Prescriptions", 
-    desc: "Access prescriptions and treatment history anytime." 
+  {
+    icon: <Pill size={24} />,
+    title: "Digital Prescriptions",
+    desc: "Access prescriptions and treatment history anytime."
   },
-  { 
-    icon: <CreditCard size={24} />, 
-    title: "Billing & Records", 
-    desc: "Track medical expenses and financial history." 
+  {
+    icon: <CreditCard size={24} />,
+    title: "Billing & Records",
+    desc: "Track medical expenses and financial history."
   },
-  { 
-    icon: <Lock size={24} />, 
-    title: "Enterprise Security", 
-    desc: "Role-based access with Firebase security." 
+  {
+    icon: <Lock size={24} />,
+    title: "Enterprise Security",
+    desc: "Role-based access with Firebase security."
   },
 ];
 
@@ -130,11 +130,11 @@ const ThreeBackground = () => {
       const light1 = new THREE.PointLight(0xffffff, 1.2, 100);
       light1.position.set(20, 20, 20);
       scene.add(light1);
-      
+
       const light2 = new THREE.PointLight(0x10b981, 1, 100);
       light2.position.set(-20, -20, 20);
       scene.add(light2);
-      
+
       scene.add(new THREE.AmbientLight(0x404040, 1.5));
 
       const onMouseMove = (e) => {
@@ -156,7 +156,7 @@ const ThreeBackground = () => {
 
       const animate = () => {
         frameId = requestAnimationFrame(animate);
-        
+
         // Damping / Easing for smooth cursor following
         targetX += (mouseX - targetX) * 0.05;
         targetY += (mouseY - targetY) * 0.05;
@@ -167,7 +167,7 @@ const ThreeBackground = () => {
           dnaGroup.rotation.y += targetX * 0.1; // Follow X
           dnaGroup.rotation.x = targetY * 0.5;  // Tilt on Y
         }
-        
+
         renderer.render(scene, camera);
       };
 
@@ -184,18 +184,18 @@ const ThreeBackground = () => {
       };
     };
 
-    let cleanupFn = () => {};
+    let cleanupFn = () => { };
 
     if (!window.THREE) {
       const script = document.createElement("script");
       script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
       script.async = true;
       script.onload = () => {
-        if (isComponentMounted) cleanupFn = initThree() || (() => {});
+        if (isComponentMounted) cleanupFn = initThree() || (() => { });
       };
       document.head.appendChild(script);
     } else {
-      cleanupFn = initThree() || (() => {});
+      cleanupFn = initThree() || (() => { });
     }
 
     return () => {
@@ -223,22 +223,21 @@ const App = () => {
       <ThreeBackground />
 
       {/* 🟢 Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white/80 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
-      }`}>
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? "bg-white/80 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
+        }`}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-2 group cursor-pointer">
             <div className="bg-emerald-600 p-2 rounded-xl text-white group-hover:rotate-12 transition-transform shadow-lg shadow-emerald-200">
               <Activity size={24} />
             </div>
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-700 to-cyan-600">
-            MediConnect
+              MediConnect
             </span>
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <a 
-              href="#features" 
+            <a
+              href="#features"
               onClick={(e) => {
                 e.preventDefault();
                 document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
@@ -247,8 +246,8 @@ const App = () => {
             >
               Features
             </a>
-            <a 
-              href="#how-it-works" 
+            <a
+              href="#how-it-works"
               onClick={(e) => {
                 e.preventDefault();
                 document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
@@ -257,13 +256,13 @@ const App = () => {
             >
               How it Works
             </a>
-            <button 
+            <button
               onClick={() => navigate("/login")}
               className="text-sm font-semibold text-emerald-700 px-5 py-2 rounded-full border border-emerald-200 hover:bg-emerald-50 transition-all"
             >
               Login
             </button>
-            <button 
+            <button
               onClick={() => navigate("/signup")}
               className="text-sm font-semibold bg-emerald-600 text-white px-6 py-2.5 rounded-full shadow-lg shadow-emerald-200 hover:bg-emerald-700 hover:-translate-y-0.5 transition-all"
             >
@@ -289,29 +288,29 @@ const App = () => {
               Interactive Medical Hub
             </span>
             <h1 className="text-5xl md:text-8xl font-black text-slate-900 leading-[1] mb-8 tracking-tight">
-            Smart Healthcare <br />
+              Smart Healthcare <br />
               <span className="text-emerald-600">Management Platform
               </span>
             </h1>
             <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-            A unified digital ecosystem connecting patients, doctors, and administrators — managing healthcare smarter, faster, and safer.
+              A unified digital ecosystem connecting patients, doctors, and administrators — managing healthcare smarter, faster, and safer.
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-5"
           >
-            <button 
+            <button
               onClick={() => navigate("/signup")}
               className="w-full sm:w-auto px-10 py-5 bg-emerald-600 text-white font-bold rounded-2xl shadow-2xl shadow-emerald-200 hover:bg-emerald-700 hover:scale-105 transition-all flex items-center justify-center gap-2"
             >
               <UserCircle size={22} />
               Join as Patient
             </button>
-            <button 
+            <button
               onClick={() => navigate("/doctor-signup")}
               className="w-full sm:w-auto px-10 py-5 bg-white/70 backdrop-blur-md text-slate-800 border border-slate-200 font-bold rounded-2xl shadow-sm hover:border-emerald-300 hover:text-emerald-600 transition-all flex items-center justify-center gap-2"
             >
@@ -332,7 +331,7 @@ const App = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, idx) => (
-              <motion.div 
+              <motion.div
                 key={idx}
                 whileHover={{ y: -12, scale: 1.02 }}
                 initial={{ opacity: 0, y: 20 }}
@@ -343,10 +342,10 @@ const App = () => {
               >
                 {/* Gradient overlay on hover */}
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/0 to-cyan-50/0 group-hover:from-emerald-50/50 group-hover:to-cyan-50/50 transition-all duration-300"></div>
-                
+
                 {/* Decorative corner accent */}
                 <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-100/30 rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                
+
                 <div className="relative z-10">
                   <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-200/50 mb-6 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-emerald-300/50 transition-all duration-300 transform">
                     {feature.icon}
@@ -387,7 +386,7 @@ const App = () => {
       <section className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
-            Built for Patients and Doctors 
+            Built for Patients and Doctors
           </h2>
           <p className="text-lg md:text-xl text-slate-600 leading-relaxed">
             Patients manage care, doctors handle appointments and  maintain quality — all from one secure platform.
@@ -395,9 +394,62 @@ const App = () => {
         </div>
       </section>
 
-      <footer className="py-12 border-t border-slate-200 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">
-        <p>© 2026 • Encrypted Healthcare Core </p>
+      <footer className="py-12 mt-10 border-t border-slate-700 bg-[#111827]">
+        <div className="max-w-6xl mx-auto px-4">
+
+          {/* GRID */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-left">
+
+            {/* ABOUT */}
+            <div>
+              <h3 className="font-bold text-slate-200 text-sm uppercase tracking-widest">
+                About HealthCare+
+              </h3>
+              <p className="mt-3 text-slate-400 text-[12px] leading-relaxed">
+                HealthCare+ is an encrypted digital healthcare platform that helps
+                patients book appointments, store prescriptions, and manage health
+                records seamlessly. Designed for speed, privacy, and real-world medical
+                workflows, it simplifies healthcare for both doctors and patients.
+              </p>
+            </div>
+
+            {/* VISION */}
+            <div>
+              <h3 className="font-bold text-slate-200 text-sm uppercase tracking-widest">
+                Our Vision
+              </h3>
+              <p className="mt-3 text-slate-400 text-[12px] leading-relaxed">
+                To build an AI-empowered healthcare ecosystem that improves medical
+                decision-making, enhances accessibility, and bridges the gap between
+                patients and modern digital healthcare solutions.
+              </p>
+            </div>
+
+            {/* DEVELOPED BY */}
+            <div>
+              <h3 className="font-bold text-slate-200 text-sm uppercase tracking-widest">
+                Developed By
+              </h3>
+              <p className="mt-3 text-slate-400 text-[12px] leading-relaxed">
+                Crafted with precision and innovation by the team at <br />
+                <span className="font-bold text-emerald-500">Tech-Forge</span>.
+                <br />
+                Building next-generation digital healthcare experiences.
+              </p>
+            </div>
+
+          </div>
+
+          {/* COPYRIGHT */}
+          <div className="mt-10 text-center">
+            <p className="text-[11px] text-slate-500 font-semibold">
+              © 2026 • Encrypted Healthcare Core
+            </p>
+          </div>
+
+        </div>
       </footer>
+
     </div>
   );
 };
