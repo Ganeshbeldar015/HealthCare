@@ -89,7 +89,7 @@ export default function Billing() {
             {bills.map((bill, index) => (
               <tr
                 key={bill.id}
-                onClick={() => navigate(`/billing/${bill.id}`)}
+                
                 className="hover:bg-gray-50 cursor-pointer"
               >
                 <td className="p-3 border">{index + 1}</td>

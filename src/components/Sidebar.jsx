@@ -53,10 +53,7 @@ function Sidebar() {
             Appointments
           </NavLink>
 
-          <NavLink to="/records" className={linkClass}>
-            <ClipboardDocumentListIcon className="w-5 h-5" />
-            Records
-          </NavLink>
+          
 
           <NavLink to="/patient/prescriptions" className={linkClass}>
             <ClipboardDocumentListIcon className="w-5 h-5" />
